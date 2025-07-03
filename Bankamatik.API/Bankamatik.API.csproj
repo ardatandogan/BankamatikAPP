@@ -10,4 +10,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bankamatik.Business\Bankamatik.Business.csproj" />
+    <ProjectReference Include="..\Bankamatik.Core\Bankamatik.Core.csproj" />
+    <ProjectReference Include="..\Bankamatik.DataAccess\Bankamatik.DataAccess.csproj" />
+  </ItemGroup>
+
 </Project>
