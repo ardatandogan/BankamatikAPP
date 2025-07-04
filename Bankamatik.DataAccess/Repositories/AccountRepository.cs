@@ -17,8 +17,21 @@ namespace Bankamatik.DataAccess.Repositories
         }
 
 
-        //GET LIST //parametreler dtodaki classların hepsi olacak
-        public List<Account> GetAccounts(int? userId = null)
+        // Stored procedure ile Account ve ilişkili Transactions silme
+        public void DeleteAccountWithTransactions(int accountId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            using var command = new SqlCommand("sp_DeleteAccountWithTransactions", connection);
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.AddWithValue("@AccountID", accountId);
+
+            connection.Open();
+            command.ExecuteNonQuery();
+        }
+
+        // GET LIST - filtre olarak Account nesnesi alır (ör. UserID filtre için)
+        public List<Account> GetAccounts(Account? filter = null)
         {
             var accounts = new List<Account>();
 
@@ -29,7 +42,7 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_GetAccounts @UserID";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserID", (object)userId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UserID", (object?)filter?.UserID ?? DBNull.Value);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -50,10 +63,10 @@ namespace Bankamatik.DataAccess.Repositories
             return accounts;
         }
 
-        //GET
-        public Account GetAccountById(int accountId)
+        // GET BY ID - sadece accountId alır (özel durum)
+        public Account? GetAccountById(int accountId)
         {
-            Account account = null;
+            Account? account = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -83,8 +96,7 @@ namespace Bankamatik.DataAccess.Repositories
             return account;
         }
 
-
-        //INSERT
+        // INSERT - entity parametre alır
         public void InsertAccount(Account account)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -94,7 +106,7 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_InsertAccount @UserID, @Balance, @Created";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserID", account.AccountID);
+                    cmd.Parameters.AddWithValue("@UserID", account.UserID);
                     cmd.Parameters.AddWithValue("@Balance", account.Balance);
 
                     if (account.CreatedAt > DateTime.MinValue)
@@ -102,13 +114,13 @@ namespace Bankamatik.DataAccess.Repositories
                     else
                         cmd.Parameters.AddWithValue("@Created", DBNull.Value);
 
-                 //modification yapılabilir adonetteki diğer execution methoduna bak
-                 cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
-        //UPDATE
-        public void UpdateAccount(int accountId, int? userId = null, decimal? balance = null, DateTime? createdAt = null)
+
+        // UPDATE - entity parametre alır, nullable değerleri DBNull olarak gönderir
+        public void UpdateAccount(Account account)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -117,21 +129,18 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_UpdateAccount @AccountID, @UserID, @Balance, @CreatedAt";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@AccountID", accountId);
-                    cmd.Parameters.AddWithValue("@UserID", (object)userId ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Balance", (object)balance ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@CreatedAt", (object)createdAt ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@AccountID", account.AccountID);
+                    cmd.Parameters.AddWithValue("@UserID", (object?)account.UserID ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Balance", (object?)account.Balance ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@CreatedAt", account.CreatedAt > DateTime.MinValue ? account.CreatedAt : DBNull.Value);
 
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
-
-
-
-        //DELETE
-        public void DeleteAccount(int accountId)
+        // DELETE - entity parametre alır
+        public void DeleteAccount(Account account)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -141,7 +150,7 @@ namespace Bankamatik.DataAccess.Repositories
                 string deleteTransactionsSql = "DELETE FROM Transactions WHERE FromAccountID = @AccountID OR ToAccountID = @AccountID";
                 using (SqlCommand cmd = new SqlCommand(deleteTransactionsSql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@AccountID", accountId);
+                    cmd.Parameters.AddWithValue("@AccountID", account.AccountID);
                     cmd.ExecuteNonQuery();
                 }
 
@@ -149,7 +158,7 @@ namespace Bankamatik.DataAccess.Repositories
                 string deleteAccountSql = "EXEC sp_DeleteAccount @AccountID";
                 using (SqlCommand cmd = new SqlCommand(deleteAccountSql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@AccountID", accountId);
+                    cmd.Parameters.AddWithValue("@AccountID", account.AccountID);
                     cmd.ExecuteNonQuery();
                 }
             }

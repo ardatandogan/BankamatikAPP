@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Bankamatik.DataAccess.Repositories;
+using Bankamatik.Core.DTOs;
 using Bankamatik.Core.Entities;
+using Microsoft.Extensions.Configuration;
 
 namespace Bankamatik.API.Controllers
 {
@@ -15,11 +17,13 @@ namespace Bankamatik.API.Controllers
             _accountRepository = new AccountRepository(configuration);
         }
 
-        // GET: api/account
+        // GET: api/account?userId=5
         [HttpGet]
         public IActionResult GetAccounts([FromQuery] int? userId)
         {
-            var accounts = _accountRepository.GetAccounts(userId);
+            // DTO yerine entity filtre olarak veriliyor
+            var filter = new Account { UserID = (int)userId };
+            var accounts = _accountRepository.GetAccounts(filter);
             return Ok(accounts);
         }
 
@@ -36,45 +40,62 @@ namespace Bankamatik.API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public IActionResult CreateAccount([FromBody] Account account)
+        public IActionResult CreateAccount([FromBody] AccountDTO accountDto)
         {
-            if (account == null)
+            if (accountDto == null)
                 return BadRequest();
 
-            _accountRepository.InsertAccount(account.UserID, account.Balance);
+            var account = new Account
+            {
+                UserID = accountDto.UserID ?? 0,
+                Balance = accountDto.Balance ?? 0,
+                CreatedAt = accountDto.CreatedAt ?? DateTime.MinValue
+            };
+
+            _accountRepository.InsertAccount(account);
             return Ok("Account created successfully.");
         }
 
         // PUT: api/account/5
         [HttpPut("{id}")]
-        public IActionResult UpdateAccount(int id, [FromBody] Account account)
+        public IActionResult UpdateAccount(int id, [FromBody] AccountDTO accountDto)
         {
-            if (account == null || id != account.AccountID)
-                return BadRequest();
+            if (accountDto == null || id != accountDto.AccountID)
+                return BadRequest("Invalid account data.");
 
-            // Eğer CreatedAt tarihini güncellemek istemiyorsan, default(DateTime) ise null say
-            DateTime? createdAt = null;
-            if (account.CreatedAt != default(DateTime))
-                createdAt = account.CreatedAt;
+            if (!accountDto.UserID.HasValue)
+                return BadRequest("UserID cannot be null.");
 
-            _accountRepository.UpdateAccount(
-                id,
-                userId: account.UserID,
-                balance: account.Balance,
-                createdAt: createdAt
-            );
+            var account = new Account
+            {
+                AccountID = accountDto.AccountID,
+                UserID = accountDto.UserID.Value,
+                Balance = accountDto.Balance ?? 0, // null ise 0 atandı, istersen başka değer verilebilir
+                CreatedAt = accountDto.CreatedAt ?? DateTime.MinValue
+            };
+
+            _accountRepository.UpdateAccount(account);
 
             return Ok("Account updated successfully.");
         }
 
 
-
+        
         // DELETE: api/account/5
         [HttpDelete("{id}")]
         public IActionResult DeleteAccount(int id)
         {
-            _accountRepository.DeleteAccount(id);
-            return Ok("Account deleted successfully.");
+            try
+            {
+                // Account entity oluşturmaya gerek yok, direkt stored procedure çağrılır
+                _accountRepository.DeleteAccountWithTransactions(id);
+                return Ok("Account and related transactions deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error deleting account: {ex.Message}");
+            }
         }
+
     }
 }

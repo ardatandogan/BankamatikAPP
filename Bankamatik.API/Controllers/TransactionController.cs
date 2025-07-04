@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Bankamatik.DataAccess.Repositories;
 using Bankamatik.Core.Entities;
+using Microsoft.Extensions.Configuration;
 
 namespace Bankamatik.API.Controllers
 {
@@ -41,11 +42,7 @@ namespace Bankamatik.API.Controllers
             if (transaction == null)
                 return BadRequest();
 
-            _transactionRepository.InsertTransaction(
-                transaction.FromAccountID,
-                transaction.ToAccountID,
-                transaction.Amount
-            );
+            _transactionRepository.InsertTransaction(transaction);
 
             return Ok("Transaction inserted successfully.");
         }
@@ -57,13 +54,7 @@ namespace Bankamatik.API.Controllers
             if (transaction == null || id != transaction.TransactionID)
                 return BadRequest();
 
-            _transactionRepository.UpdateTransaction(
-                id,
-                transaction.FromAccountID,
-                transaction.ToAccountID,
-                transaction.Amount,
-                transaction.TransactionDate
-            );
+            _transactionRepository.UpdateTransaction(transaction);
 
             return Ok("Transaction updated successfully.");
         }

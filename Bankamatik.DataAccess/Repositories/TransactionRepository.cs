@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Data.SqlClient;
 using Bankamatik.Core.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Bankamatik.DataAccess.Repositories
 {
@@ -13,8 +15,7 @@ namespace Bankamatik.DataAccess.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-
-        //GET LIST
+        // GET LIST
         public List<Transaction> GetTransactions(int? accountId = null)
         {
             var transactions = new List<Transaction>();
@@ -26,7 +27,7 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_GetTransactionList @AccountID";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@AccountID", (object)accountId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@AccountID", (object?)accountId ?? DBNull.Value);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -47,7 +48,8 @@ namespace Bankamatik.DataAccess.Repositories
 
             return transactions;
         }
-        //GET 
+
+        // GET BY ID
         public Transaction GetTransactionById(int transactionId)
         {
             Transaction transaction = null;
@@ -80,8 +82,9 @@ namespace Bankamatik.DataAccess.Repositories
 
             return transaction;
         }
-        //INSERT
-        public void InsertTransaction(int fromAccountId, int toAccountId, decimal amount)
+
+        // INSERT
+        public void InsertTransaction(Transaction transaction)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -90,15 +93,37 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_InsertTransaction @FromAccountID, @ToAccountID, @Amount";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@FromAccountID", fromAccountId);
-                    cmd.Parameters.AddWithValue("@ToAccountID", toAccountId);
-                    cmd.Parameters.AddWithValue("@Amount", amount);
+                    cmd.Parameters.AddWithValue("@FromAccountID", transaction.FromAccountID);
+                    cmd.Parameters.AddWithValue("@ToAccountID", transaction.ToAccountID);
+                    cmd.Parameters.AddWithValue("@Amount", transaction.Amount);
 
                     cmd.ExecuteNonQuery();
                 }
             }
         }
-        //DELETE
+
+        // UPDATE
+        public void UpdateTransaction(Transaction transaction)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                string sql = "EXEC sp_UpdateTransaction @TransactionID, @FromAccountID, @ToAccountID, @Amount, @TransactionDate";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TransactionID", transaction.TransactionID);
+                    cmd.Parameters.AddWithValue("@FromAccountID", transaction.FromAccountID);
+                    cmd.Parameters.AddWithValue("@ToAccountID", transaction.ToAccountID);
+                    cmd.Parameters.AddWithValue("@Amount", transaction.Amount);
+                    cmd.Parameters.AddWithValue("@TransactionDate", transaction.TransactionDate);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // DELETE
         public void DeleteTransaction(int transactionId)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -109,32 +134,9 @@ namespace Bankamatik.DataAccess.Repositories
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@TransactionID", transactionId);
-
                     cmd.ExecuteNonQuery();
                 }
             }
         }
-
-        // UPDATE
-        public void UpdateTransaction(int transactionId, int fromAccountId, int toAccountId, decimal amount, DateTime transactionDate)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-
-                string sql = "EXEC sp_UpdateTransaction @TransactionID, @FromAccountID, @ToAccountID, @Amount, @TransactionDate";
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@TransactionID", transactionId);
-                    cmd.Parameters.AddWithValue("@FromAccountID", fromAccountId);
-                    cmd.Parameters.AddWithValue("@ToAccountID", toAccountId);
-                    cmd.Parameters.AddWithValue("@Amount", amount);
-                    cmd.Parameters.AddWithValue("@TransactionDate", transactionDate);
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
     }
 }

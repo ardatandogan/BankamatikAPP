@@ -14,7 +14,7 @@ namespace Bankamatik.DataAccess.Repositories
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // GET LIST
+        // GET LIST - Tüm kullanıcıları listeler
         public List<User> GetUsers()
         {
             var users = new List<User>();
@@ -42,23 +42,23 @@ namespace Bankamatik.DataAccess.Repositories
             return users;
         }
 
-        // GET
-        public User? GetUser(string username)
+        // GET - Kullanıcıyı username ile getirir
+        public User? GetUser(User user)
         {
-            User? user = null;
+            User? result = null;
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_GetUser", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@Username", username);
+                command.Parameters.AddWithValue("@Username", user.Username);
 
                 connection.Open();
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
                     if (reader.Read())
                     {
-                        user = new User
+                        result = new User
                         {
                             ID = Convert.ToInt32(reader["ID"]),
                             Username = reader["Username"].ToString() ?? "",
@@ -68,41 +68,42 @@ namespace Bankamatik.DataAccess.Repositories
                 }
             }
 
-            return user;
+            return result;
         }
 
-        // INSERT
-        public void InsertUser(string username, string passwordHash)
+
+        // INSERT - Yeni kullanıcı ekler
+        public void InsertUser(User user)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_InsertUser", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@Username", username);
-                command.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                command.Parameters.AddWithValue("@Username", user.Username);
+                command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
 
                 connection.Open();
                 command.ExecuteNonQuery();
             }
         }
 
-        // UPDATE
-        public void UpdateUser(int id, string username, string passwordHash)
+        // UPDATE - Var olan kullanıcıyı günceller
+        public void UpdateUser(User user)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_UpdateUser", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@ID", id);
-                command.Parameters.AddWithValue("@Username", username);
-                command.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                command.Parameters.AddWithValue("@ID", user.ID);
+                command.Parameters.AddWithValue("@Username", user.Username);
+                command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
 
                 connection.Open();
                 command.ExecuteNonQuery();
             }
         }
 
-        // DELETE
+        // DELETE - Kullanıcıyı siler
         public void DeleteUser(int id)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))

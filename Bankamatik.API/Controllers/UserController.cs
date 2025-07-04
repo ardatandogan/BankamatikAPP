@@ -1,8 +1,10 @@
-﻿using Bankamatik.DataAccess.Repositories;
+﻿using Bankamatik.Core.DTOs;
 using Bankamatik.Core.Entities;
+using Bankamatik.DataAccess.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Linq;
 
 namespace BankamatikAPI.Controllers
 {
@@ -26,7 +28,14 @@ namespace BankamatikAPI.Controllers
         [HttpGet]
         public IActionResult GetUsers()
         {
-            var users = _userRepository.GetUsers();
+            var users = _userRepository.GetUsers()
+                .Select(u => new UserDTO
+                {
+                    ID = u.ID,
+                    Username = u.Username
+                })
+                .ToList();
+
             return Ok(users);
         }
 
@@ -34,32 +43,53 @@ namespace BankamatikAPI.Controllers
         [HttpGet("{username}")]
         public IActionResult GetUser(string username)
         {
-            var user = _userRepository.GetUser(username);
+            var userEntity = new User { Username = username };
+            var user = _userRepository.GetUser(userEntity);
+
             if (user == null)
                 return NotFound($"User with username '{username}' not found.");
 
-            return Ok(user);
+            var userDto = new UserDTO
+            {
+                ID = user.ID,
+                Username = user.Username
+            };
+
+            return Ok(userDto);
         }
 
         // POST: api/user
         [HttpPost]
-        public IActionResult InsertUser([FromBody] User user)
+        public IActionResult InsertUser([FromBody] UserLoginDTO loginDto)
         {
-            if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
+            if (loginDto == null || string.IsNullOrWhiteSpace(loginDto.Username) || string.IsNullOrWhiteSpace(loginDto.PasswordHash))
                 return BadRequest("Username and PasswordHash are required.");
 
-            _userRepository.InsertUser(user.Username, user.PasswordHash);
+            var user = new User
+            {
+                Username = loginDto.Username,
+                PasswordHash = loginDto.PasswordHash
+            };
+
+            _userRepository.InsertUser(user);
             return Ok("User inserted successfully.");
         }
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public IActionResult UpdateUser(int id, [FromBody] UserLoginDTO loginDto)
         {
-            if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
+            if (loginDto == null || string.IsNullOrWhiteSpace(loginDto.Username) || string.IsNullOrWhiteSpace(loginDto.PasswordHash))
                 return BadRequest("Username and PasswordHash are required.");
 
-            _userRepository.UpdateUser(id, user.Username, user.PasswordHash);
+            var user = new User
+            {
+                ID = id,
+                Username = loginDto.Username,
+                PasswordHash = loginDto.PasswordHash
+            };
+
+            _userRepository.UpdateUser(user);
             return Ok("User updated successfully.");
         }
 
