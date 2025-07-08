@@ -68,9 +68,11 @@
             dgvAccounts.Dock = DockStyle.Fill;
             dgvAccounts.Location = new Point(0, 0);
             dgvAccounts.Name = "dgvAccounts";
+            dgvAccounts.ReadOnly = true;
             dgvAccounts.RowHeadersWidth = 51;
             dgvAccounts.Size = new Size(1244, 590);
             dgvAccounts.TabIndex = 4;
+            dgvAccounts.DoubleClick += dgv_AccountsDoubleClick;
             // 
             // textBox1
             // 
@@ -89,6 +91,7 @@
             dgvUsers.RowHeadersWidth = 51;
             dgvUsers.Size = new Size(1244, 588);
             dgvUsers.TabIndex = 7;
+            dgvUsers.DoubleClick += dgvUsers_DoubleClick;
             // 
             // textBox3
             // 
@@ -211,9 +214,11 @@
             dgvTransactions.Dock = DockStyle.Fill;
             dgvTransactions.Location = new Point(0, 0);
             dgvTransactions.Name = "dgvTransactions";
+            dgvTransactions.ReadOnly = true;
             dgvTransactions.RowHeadersWidth = 51;
             dgvTransactions.Size = new Size(1244, 591);
             dgvTransactions.TabIndex = 10;
+            dgvTransactions.DoubleClick += dgvTransactions_DoubleClick;
             // 
             // MainPage
             // 

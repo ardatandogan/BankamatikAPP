@@ -65,5 +65,27 @@ namespace BankamatikFormApp
             );
         }
 
+        private void dgvUsers_DoubleClick(object sender, EventArgs e)
+        {
+            //İlgili satır bilgileri UpdatePage'e aktarılır.
+            UpdatePage updatePage = new UpdatePage();
+            updatePage.CurrentUser = dgvUsers.CurrentRow.DataBoundItem as User;
+            updatePage.ShowDialog();
+        }
+
+
+        private void dgv_AccountsDoubleClick(object sender, EventArgs e)
+        {
+            UpdateBalancePage updateBalancePage = new UpdateBalancePage();
+            updateBalancePage.CurrentAccount = dgvAccounts.CurrentRow.DataBoundItem as Account;
+            updateBalancePage.ShowDialog();
+        }
+        private void dgvTransactions_DoubleClick(object sender, EventArgs e)
+        {
+            UpdateTransactionPage updateTransactionPage = new UpdateTransactionPage();
+            updateTransactionPage.CurrentTransaction = dgvTransactions.CurrentRow.DataBoundItem as Transaction;
+            updateTransactionPage.ShowDialog();
+            }
+        }
     }
-}
+

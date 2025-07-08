@@ -3,6 +3,7 @@ using Bankamatik.DataAccess.Repositories;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Bankamatik.Business.Services
 {
@@ -28,9 +29,9 @@ namespace Bankamatik.Business.Services
         }
         //get by username
         public User? GetUserByUsername(User user)
-           
+
         {
-            return _userRepository.GetUser(user); 
+            return _userRepository.GetUser(user);
         }
 
         //create user kontrolleri en az 8 karakter - boş olamaz - aynı isimde kullanıcı olamaz
@@ -83,30 +84,29 @@ namespace Bankamatik.Business.Services
 
 
 
-        public void UpdateUser(User user)
+        public string UpdateUser(User user)
         {
+            string sonuc = string.Empty;
             try
             {
                 if (string.IsNullOrWhiteSpace(user.Username))
                 {
-                    Console.WriteLine("Validation Error: Username cannot be empty.");
-                    return; // Hata varsa işlemi sonlandır
+                    throw new Exception("Validation Error: Username cannot be empty.");
                 }
 
                 if (string.IsNullOrWhiteSpace(user.PasswordHash) || user.PasswordHash.Length < 8)
                 {
-                    Console.WriteLine("Validation Error: Password must be at least 8 characters long.");
-                    return;
+                    throw new Exception("Validation Error: Password must be at least 8 characters long.");
                 }
 
                 _userRepository.UpdateUser(user);
-                Console.WriteLine("User updated successfully.");
+                sonuc = "Başarılı";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An unexpected error occurred during user update: {ex.Message}");
-                
+                sonuc = ex.Message;
             }
+            return sonuc;
         }
 
         public void DeleteUser(User user)
@@ -127,7 +127,7 @@ namespace Bankamatik.Business.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Unexpected error occurred while deleting user: {ex.Message}");
-                
+
             }
         }
 
