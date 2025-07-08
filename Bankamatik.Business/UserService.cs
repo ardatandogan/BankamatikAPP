@@ -1,5 +1,6 @@
 ﻿using Bankamatik.Core.Entities;
 using Bankamatik.DataAccess.Repositories;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 
@@ -14,46 +15,122 @@ namespace Bankamatik.Business.Services
             _userRepository = userRepository;
         }
 
+        public UserService()
+        {
+        }
+
+        //dependency injection nedir : nesneyi dışarıdan alarak bağımlılığı azaltmak 
+
+        //tüm kullanıcılar
         public List<User> GetAllUsers()
         {
             return _userRepository.GetUsers();
         }
-
-        public User? GetUserByUsername(string username)
+        //get by username
+        public User? GetUserByUsername(User user)
+           
         {
-            return _userRepository.GetUser(new User { Username = username }); // 👈 eski method string değil User bekliyor
+            return _userRepository.GetUser(user); 
         }
 
+        //create user kontrolleri en az 8 karakter - boş olamaz - aynı isimde kullanıcı olamaz
         public void CreateUser(User user)
         {
-            if (string.IsNullOrWhiteSpace(user.Username))
-                throw new ArgumentException("Username cannot be empty.");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(user.Username))
+                    throw new ArgumentException("Username cannot be empty.");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("Username error: " + ex.Message);
+                return;
+            }
 
-            if (string.IsNullOrWhiteSpace(user.PasswordHash) || user.PasswordHash.Length < 8)
-                throw new ArgumentException("Password must be at least 8 characters long.");
+            try
+            {
+                if (user.PasswordHash.Length < 8)
+                    throw new ArgumentException("Password too short.");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("Password error: " + ex.Message);
+                return;
+            }
 
-            var existingUser = _userRepository.GetUser(new User { Username = user.Username }); // 👈 eski methoda uygun
+            try
+            {
+                var existingUser = _userRepository.GetUser(new User { Username = user.Username });
+                if (existingUser != null)
+                    throw new InvalidOperationException("User already exists.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine("Duplicate user: " + ex.Message);
+                return;
+            }
 
-            if (existingUser != null)
-                throw new InvalidOperationException("A user with the same username already exists.");
-
-            _userRepository.InsertUser(user); // 👈 eski method 2 parametre alıyor
+            try
+            {
+                _userRepository.InsertUser(user);
+                Console.WriteLine("User created successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Database error: " + ex.Message);
+            }
         }
+
+
 
         public void UpdateUser(User user)
         {
-            if (string.IsNullOrWhiteSpace(user.Username))
-                throw new ArgumentException("Username cannot be empty.");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(user.Username))
+                {
+                    Console.WriteLine("Validation Error: Username cannot be empty.");
+                    return; // Hata varsa işlemi sonlandır
+                }
 
-            if (string.IsNullOrWhiteSpace(user.PasswordHash) || user.PasswordHash.Length < 8)
-                throw new ArgumentException("Password must be at least 8 characters long.");
+                if (string.IsNullOrWhiteSpace(user.PasswordHash) || user.PasswordHash.Length < 8)
+                {
+                    Console.WriteLine("Validation Error: Password must be at least 8 characters long.");
+                    return;
+                }
 
-            _userRepository.UpdateUser(user); // 👈 eski method 3 parametre alıyor
+                _userRepository.UpdateUser(user);
+                Console.WriteLine("User updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred during user update: {ex.Message}");
+                
+            }
         }
 
-        public void DeleteUser(int id)
+        public void DeleteUser(User user)
         {
-            _userRepository.DeleteUser(id);
+            try
+            {
+                _userRepository.DeleteUser(user);
+                Console.WriteLine("User successfully deleted.");
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine($"User is null: {ex.Message}");
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine($"Database error while deleting user: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error occurred while deleting user: {ex.Message}");
+                
+            }
         }
+
+
     }
 }

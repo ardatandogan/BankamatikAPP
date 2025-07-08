@@ -11,29 +11,35 @@ namespace Bankamatik.API.Controllers
     {
         private readonly TransactionRepository _transactionRepository;
 
-        public TransactionController(IConfiguration configuration)
+        public TransactionController()
         {
-            _transactionRepository = new TransactionRepository(configuration);
+            _transactionRepository = new TransactionRepository();
         }
 
         // GET: api/transaction
         [HttpGet]
+        [HttpGet]
         public IActionResult GetAllTransactions([FromQuery] int? accountId)
         {
-            var transactions = _transactionRepository.GetTransactions(accountId);
+            var transaction = new Transaction { AccountID = accountId };
+            var transactions = _transactionRepository.GetTransactions(transaction);
             return Ok(transactions);
         }
+
 
         // GET: api/transaction/5
         [HttpGet("{id}")]
         public IActionResult GetTransactionById(int id)
         {
-            var transaction = _transactionRepository.GetTransactionById(id);
+            var transactionParam = new Transaction { TransactionID = id };
+            var transaction = _transactionRepository.GetTransactionById(transactionParam);
+
             if (transaction == null)
                 return NotFound();
 
             return Ok(transaction);
         }
+
 
         // POST: api/transaction
         [HttpPost]
@@ -63,8 +69,10 @@ namespace Bankamatik.API.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteTransaction(int id)
         {
-            _transactionRepository.DeleteTransaction(id);
+            var transaction = new Transaction { TransactionID = id };
+            _transactionRepository.DeleteTransaction(transaction);
             return Ok("Transaction deleted successfully.");
         }
+
     }
 }

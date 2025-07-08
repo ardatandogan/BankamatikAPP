@@ -10,13 +10,14 @@ namespace Bankamatik.DataAccess.Repositories
     {
         private readonly string _connectionString;
 
-        public TransactionRepository(IConfiguration configuration)
+        public TransactionRepository()
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
 
         // GET LIST
-        public List<Transaction> GetTransactions(int? accountId = null)
+        //dynamik sql ekstra 
+        public List<Transaction> GetTransactions(Transaction transaction)
         {
             var transactions = new List<Transaction>();
 
@@ -24,10 +25,10 @@ namespace Bankamatik.DataAccess.Repositories
             {
                 conn.Open();
 
-                string sql = "EXEC sp_GetTransactionList @AccountID";
+                string sql = "EXEC sp_GetTransactions @AccountID";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@AccountID", (object?)accountId ?? DBNull.Value);
+                {        
+                    cmd.Parameters.AddWithValue("@AccountID", (object?)transaction.AccountID ?? DBNull.Value);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -50,9 +51,10 @@ namespace Bankamatik.DataAccess.Repositories
         }
 
         // GET BY ID
-        public Transaction GetTransactionById(int transactionId)
+        //parametre değişecek
+        public Transaction? GetTransactionById(Transaction transaction)
         {
-            Transaction transaction = null;
+            Transaction? result = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -61,13 +63,13 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_GetTransaction @TransactionID";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@TransactionID", transactionId);
+                    cmd.Parameters.AddWithValue("@TransactionID", transaction.TransactionID);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            transaction = new Transaction
+                            result = new Transaction
                             {
                                 TransactionID = reader.GetInt32(reader.GetOrdinal("TransactionID")),
                                 FromAccountID = reader.GetInt32(reader.GetOrdinal("FromAccountID")),
@@ -80,8 +82,9 @@ namespace Bankamatik.DataAccess.Repositories
                 }
             }
 
-            return transaction;
+            return result;
         }
+
 
         // INSERT
         public void InsertTransaction(Transaction transaction)
@@ -124,7 +127,7 @@ namespace Bankamatik.DataAccess.Repositories
         }
 
         // DELETE
-        public void DeleteTransaction(int transactionId)
+        public void DeleteTransaction(Transaction transaction)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -133,10 +136,11 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_DeleteTransaction @TransactionID";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@TransactionID", transactionId);
+                    cmd.Parameters.AddWithValue("@TransactionID", transaction.TransactionID);
                     cmd.ExecuteNonQuery();
                 }
             }
         }
+
     }
 }

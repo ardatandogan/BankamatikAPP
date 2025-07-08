@@ -14,7 +14,7 @@ namespace Bankamatik.API.Controllers
 
         public AuthController(IConfiguration configuration)
         {
-            _userRepository = new UserRepository(configuration);
+            _userRepository = new UserRepository();
         }
 
         // POST: api/auth/login
@@ -26,17 +26,17 @@ namespace Bankamatik.API.Controllers
 
             var user = _userRepository.GetUser(new User { Username = loginDto.Username });
 
-
+            //password eşleşme kontrolü
             if (user == null || user.PasswordHash != loginDto.PasswordHash)
                 return Unauthorized("Invalid username or password.");
 
-            // Giriş başarılı, şimdilik sade bir dönüş
+            // Giriş başarılıysa
             return Ok(new
             {
                 Message = "Login successful",
                 UserID = user.ID,
                 Username = user.Username
-                // Token vb. eklenecekse buraya eklenir
+             
             });
         }
     }

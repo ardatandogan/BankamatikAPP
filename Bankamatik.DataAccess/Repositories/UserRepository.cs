@@ -9,12 +9,12 @@ namespace Bankamatik.DataAccess.Repositories
     {
         private readonly string _connectionString;
 
-        public UserRepository(IConfiguration configuration)
+        public UserRepository()
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
 
-        // GET LIST - Tüm kullanıcıları listeler
+        // GET LIST 
         public List<User> GetUsers()
         {
             var users = new List<User>();
@@ -42,7 +42,7 @@ namespace Bankamatik.DataAccess.Repositories
             return users;
         }
 
-        // GET - Kullanıcıyı username ile getirir
+        // GET - Kullanıcıyı username ile getir
         public User? GetUser(User user)
         {
             User? result = null;
@@ -61,6 +61,8 @@ namespace Bankamatik.DataAccess.Repositories
                         result = new User
                         {
                             ID = Convert.ToInt32(reader["ID"]),
+
+                            //SOL TARAF NULL ISE BOŞ STRING KULLAN
                             Username = reader["Username"].ToString() ?? "",
                             PasswordHash = reader["PasswordHash"].ToString() ?? ""
                         };
@@ -72,9 +74,10 @@ namespace Bankamatik.DataAccess.Repositories
         }
 
 
-        // INSERT - Yeni kullanıcı ekler
+        // INSERT 
         public void InsertUser(User user)
         {
+            //using ne işe yarar burada
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_InsertUser", connection))
             {
@@ -87,7 +90,7 @@ namespace Bankamatik.DataAccess.Repositories
             }
         }
 
-        // UPDATE - Var olan kullanıcıyı günceller
+        // UPDATE 
         public void UpdateUser(User user)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -103,18 +106,19 @@ namespace Bankamatik.DataAccess.Repositories
             }
         }
 
-        // DELETE - Kullanıcıyı siler
-        public void DeleteUser(int id)
+        // DELETE 
+        public void DeleteUser(User user)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_DeleteUser", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@ID", id);
+                command.Parameters.AddWithValue("@ID", user.ID);
 
                 connection.Open();
                 command.ExecuteNonQuery();
             }
         }
+
     }
 }

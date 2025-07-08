@@ -12,9 +12,9 @@ namespace Bankamatik.API.Controllers
     {
         private readonly AccountRepository _accountRepository;
 
-        public AccountController(IConfiguration configuration)
+        public AccountController()
         {
-            _accountRepository = new AccountRepository(configuration);
+            _accountRepository = new AccountRepository();
         }
 
         // GET: api/account?userId=5
@@ -31,12 +31,15 @@ namespace Bankamatik.API.Controllers
         [HttpGet("{id}")]
         public IActionResult GetAccountById(int id)
         {
-            var account = _accountRepository.GetAccountById(id);
+            var accountParam = new Account { AccountID = id };
+            var account = _accountRepository.GetAccountById(accountParam);
+
             if (account == null)
                 return NotFound();
 
             return Ok(account);
         }
+
 
         // POST: api/account
         [HttpPost]
@@ -70,7 +73,7 @@ namespace Bankamatik.API.Controllers
             {
                 AccountID = accountDto.AccountID,
                 UserID = accountDto.UserID.Value,
-                Balance = accountDto.Balance ?? 0, // null ise 0 atandı, istersen başka değer verilebilir
+                Balance = accountDto.Balance ?? 0, // null ise 0 ata
                 CreatedAt = accountDto.CreatedAt ?? DateTime.MinValue
             };
 
@@ -80,15 +83,15 @@ namespace Bankamatik.API.Controllers
         }
 
 
-        
+
         // DELETE: api/account/5
         [HttpDelete("{id}")]
         public IActionResult DeleteAccount(int id)
         {
             try
             {
-                // Account entity oluşturmaya gerek yok, direkt stored procedure çağrılır
-                _accountRepository.DeleteAccountWithTransactions(id);
+                var account = new Account { AccountID = id };
+                _accountRepository.DeleteAccount(account);
                 return Ok("Account and related transactions deleted successfully.");
             }
             catch (Exception ex)
@@ -96,6 +99,7 @@ namespace Bankamatik.API.Controllers
                 return BadRequest($"Error deleting account: {ex.Message}");
             }
         }
+
 
     }
 }

@@ -21,7 +21,7 @@ namespace BankamatikAPI.Controllers
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            _userRepository = new UserRepository(configuration);
+            _userRepository = new UserRepository();
         }
 
         // GET: api/user
@@ -97,8 +97,11 @@ namespace BankamatikAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            _userRepository.DeleteUser(id);
+            var user = new User { ID = id };
+            _userRepository.DeleteUser(user);
             return Ok("User deleted successfully.");
         }
+
+
     }
 }

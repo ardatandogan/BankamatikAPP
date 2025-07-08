@@ -13,23 +13,27 @@ namespace Bankamatik.Business.Services
         {
             _accountRepository = accountRepository;
         }
-
-        public List<Account> GetAccountsByUserId(int? userId)
+        //*
+        public List<Account> GetAccountsByUserId(Account account)
         {
             var filter = new Account();
-            if (userId.HasValue)
-                filter.UserID = userId.Value;
+            if (account.UserID != null)  
+                filter.UserID = account.UserID;
 
             return _accountRepository.GetAccounts(filter);
         }
 
-        public Account? GetAccountById(int id)
+
+        //* 
+        public Account? GetAccountById(Account account)
         {
-            return _accountRepository.GetAccountById(id);
+            return _accountRepository.GetAccountById(account);
         }
 
+        //userid zorunlu - balance negaitf olamaz
         public void CreateAccount(Account account)
         {
+            //try catch*
             if (account.UserID <= 0)
                 throw new ArgumentException("UserID is required.");
 
@@ -39,8 +43,10 @@ namespace Bankamatik.Business.Services
             _accountRepository.InsertAccount(account);
         }
 
+        //acc id 0dan büyük
         public void UpdateAccount(Account account)
         {
+            //try catch
             if (account.AccountID <= 0)
                 throw new ArgumentException("Valid AccountID is required.");
 
@@ -48,6 +54,8 @@ namespace Bankamatik.Business.Services
         }
 
         public void DeleteAccount(int accountId)
+
+            //try catch ve parametre
         {
             var account = new Account { AccountID = accountId };
             _accountRepository.DeleteAccount(account);
