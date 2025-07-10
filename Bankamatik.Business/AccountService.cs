@@ -13,52 +13,58 @@ namespace Bankamatik.Business.Services
         {
             _accountRepository = accountRepository;
         }
-        //*
+
         public List<Account> GetAccountsByUserId(Account account)
         {
             var filter = new Account();
-            if (account.UserID != null)  
+            if (account.UserID != null)
                 filter.UserID = account.UserID;
 
             return _accountRepository.GetAccounts(filter);
         }
-
-
-        //* 
-        public Account? GetAccountById(Account account)
-        {
-            return _accountRepository.GetAccountById(account);
-        }
-
-        //userid zorunlu - balance negaitf olamaz
+ 
         public void CreateAccount(Account account)
         {
-            //try catch*
-            if (account.UserID <= 0)
-                throw new ArgumentException("UserID is required.");
+            try
+            {
+                if (account.UserID <= 0)
+                    throw new ArgumentException("UserID is required.");
 
-            if (account.Balance < 0)
-                throw new ArgumentException("Initial balance cannot be negative.");
+                if (account.Balance < 0)
+                    throw new ArgumentException("Initial balance cannot be negative.");
 
-            _accountRepository.InsertAccount(account);
+                _accountRepository.InsertAccount(account);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error creating account: " + ex.Message, ex);
+            }
         }
 
-        //acc id 0dan büyük
         public void UpdateAccount(Account account)
         {
-            //try catch
-            if (account.AccountID <= 0)
-                throw new ArgumentException("Valid AccountID is required.");
+            try
+            {
+                if (account.AccountID <= 0)
+                    throw new ArgumentException("Valid AccountID is required.");
 
-            _accountRepository.UpdateAccount(account);
+                _accountRepository.UpdateAccount(account);
+            }
+            catch (Exception ex)
+            {
+                // Hata işleme
+                throw new Exception("Error updating account: " + ex.Message, ex);
+            }
         }
 
-        public void DeleteAccount(int accountId)
 
-            //try catch ve parametre
+        public bool DeleteAccount(int accountId)
         {
+            _accountRepository.DeleteTransactionsByAccountId(accountId);
             var account = new Account { AccountID = accountId };
-            _accountRepository.DeleteAccount(account);
+            int affectedRows = _accountRepository.DeleteAccount(account);
+            return affectedRows > 0;
+
         }
     }
 }

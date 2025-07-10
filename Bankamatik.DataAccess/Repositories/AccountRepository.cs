@@ -16,24 +16,56 @@ namespace Bankamatik.DataAccess.Repositories
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
 
-        //TRIGGERLA YAPILDI
-        public void DeleteAccount(Account account)
+        public int DeleteAccount(Account account)
         {
             using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("trg_DeleteAccount_Transactions", connection);
-            command.CommandType = CommandType.StoredProcedure;
-
+            using var command = new SqlCommand("DELETE FROM Accounts WHERE AccountID = @AccountID", connection);
             command.Parameters.AddWithValue("@AccountID", account.AccountID);
+
+            connection.Open();
+            return command.ExecuteNonQuery();
+        }
+        public void DeleteTransactionsByAccountId(int accountId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            string sql = "DELETE FROM Transactions WHERE FromAccountID = @AccountID OR ToAccountID = @AccountID";
+
+            using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@AccountID", accountId);
+
             connection.Open();
             command.ExecuteNonQuery();
-
-
         }
-        //optional parameter = değer verilmezse default olarak geçilecek değer varsa bu duruma denir.
+        public void DeleteAccountWithTransactions(int accountId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                // Önce transactions sil
+                var deleteTransactionsCmd = new SqlCommand("DELETE FROM Transactions WHERE FromAccountID = @AccountID OR ToAccountID = @AccountID", connection, transaction);
+                deleteTransactionsCmd.Parameters.AddWithValue("@AccountID", accountId);
+                deleteTransactionsCmd.ExecuteNonQuery();
+
+                // Sonra account sil
+                var deleteAccountCmd = new SqlCommand("DELETE FROM Accounts WHERE AccountID = @AccountID", connection, transaction);
+                deleteAccountCmd.Parameters.AddWithValue("@AccountID", accountId);
+                deleteAccountCmd.ExecuteNonQuery();
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
 
         // GET LIST 
-
-        //dynamic sql ile birden fazla where koşulu calıstırabilecek bir şekilde yeni bir sp ekle.
         public List<Account> GetAccounts(Account account)
         {
             var accounts = new List<Account>();
@@ -45,7 +77,7 @@ namespace Bankamatik.DataAccess.Repositories
 
                 // Account nesnesinden gelen filtreleri kontrol et
                 cmd.Parameters.AddWithValue("@UserID", (object?)account.UserID ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@BalanceMin", DBNull.Value); 
+                cmd.Parameters.AddWithValue("@BalanceMin", DBNull.Value);
                 cmd.Parameters.AddWithValue("@BalanceMax", DBNull.Value);
 
                 conn.Open();
@@ -96,7 +128,6 @@ namespace Bankamatik.DataAccess.Repositories
                     }
                 }
             }
-
             return result;
         }
 

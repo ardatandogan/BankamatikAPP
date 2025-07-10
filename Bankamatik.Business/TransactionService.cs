@@ -16,9 +16,6 @@ namespace Bankamatik.Business.Services
             _accountRepository = accountRepository;
         }
 
-        //account id varsa onu, yoksa hepsini getir
-
-     
         public List<Transaction> GetTransactions(Transaction transaction)
         {
             return _transactionRepository.GetTransactions(transaction);
@@ -29,11 +26,8 @@ namespace Bankamatik.Business.Services
             return _transactionRepository.GetTransactionById(transaction);
         }
 
-        //negatif kontrolü - aynı hesaba transfer kontrolü - from ve to account exist mi kontrolü
-        //ve - yeterli bakiye kontrolü
         public void CreateTransaction(Transaction transaction)
         {
-            //try catch
             if (transaction.Amount <= 0)
                 throw new ArgumentException("Transaction amount must be positive.");
 
@@ -56,9 +50,7 @@ namespace Bankamatik.Business.Services
             _accountRepository.UpdateAccount(toAccount);
             _transactionRepository.InsertTransaction(transaction);
         }
-        //exception handling .net****
-
-        //transaction id zorunlu
+ 
         public void UpdateTransaction(Transaction transaction)
         {
             try
@@ -77,19 +69,17 @@ namespace Bankamatik.Business.Services
                 Console.WriteLine($"Unexpected error during update: {ex.Message}");
             }
         }
-
         public void DeleteTransaction(Transaction transaction)
         {
-            try
-            {
                 _transactionRepository.DeleteTransaction(transaction);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting transaction: {ex.Message}");
-                
-            }
         }
+
+        public void DeleteTransactionsByAccountId(int accountId)
+        {
+            _transactionRepository.DeleteTransactionsByAccountId(accountId);
+        }
+
+
 
     }
 }

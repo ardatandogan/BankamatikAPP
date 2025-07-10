@@ -9,7 +9,10 @@ namespace BankamatikFormApp
     public partial class UpdateBalancePage : Form
     {
         public Account CurrentAccount { get; set; }
+        public int? CurrentUserID { get; set; }  // Kullanıcı ID'si için property eklendi
+
         private readonly AccountService accountService = new AccountService(new AccountRepository());
+        private readonly LogService logService = new LogService(new LogRepository());
 
         public UpdateBalancePage()
         {
@@ -31,10 +34,21 @@ namespace BankamatikFormApp
                     MessageBox.Show("Balance cannot be negative.");
                     return;
                 }
-               
-                CurrentAccount.Balance = newBalance;
-                accountService.UpdateAccount(CurrentAccount);
-                MessageBox.Show("Balance updated successfully.");
+
+                try
+                {
+                    CurrentAccount.Balance = newBalance;
+                    accountService.UpdateAccount(CurrentAccount);
+
+                    // Log kaydı eklendi
+                    logService.InsertLog(CurrentUserID, "UpdateBalance", $"AccountID {CurrentAccount.AccountID} balance updated to {newBalance}");
+
+                    MessageBox.Show("Balance updated successfully.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error updating balance: {ex.Message}");
+                }
             }
             else
             {

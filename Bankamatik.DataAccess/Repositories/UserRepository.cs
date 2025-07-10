@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Bankamatik.Core.Entities;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace Bankamatik.DataAccess.Repositories
 {
@@ -33,7 +34,8 @@ namespace Bankamatik.DataAccess.Repositories
                         {
                             ID = Convert.ToInt32(reader["ID"]),
                             Username = reader["Username"].ToString() ?? "",
-                            PasswordHash = reader["PasswordHash"].ToString() ?? ""
+                            PasswordHash = reader["PasswordHash"].ToString() ?? "",
+                            Role = reader["Role"].ToString() ?? "User"  // Rolü oku, yoksa default "User"
                         });
                     }
                 }
@@ -61,10 +63,9 @@ namespace Bankamatik.DataAccess.Repositories
                         result = new User
                         {
                             ID = Convert.ToInt32(reader["ID"]),
-
-                            //SOL TARAF NULL ISE BOŞ STRING KULLAN
                             Username = reader["Username"].ToString() ?? "",
-                            PasswordHash = reader["PasswordHash"].ToString() ?? ""
+                            PasswordHash = reader["PasswordHash"].ToString() ?? "",
+                            Role = reader["Role"].ToString() ?? "User"
                         };
                     }
                 }
@@ -73,17 +74,16 @@ namespace Bankamatik.DataAccess.Repositories
             return result;
         }
 
-
         // INSERT 
         public void InsertUser(User user)
         {
-            //using ne işe yarar burada
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = new SqlCommand("sp_InsertUser", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("@Username", user.Username);
                 command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
+                command.Parameters.AddWithValue("@Role", user.Role ?? "User");
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -100,6 +100,7 @@ namespace Bankamatik.DataAccess.Repositories
                 command.Parameters.AddWithValue("@ID", user.ID);
                 command.Parameters.AddWithValue("@Username", user.Username);
                 command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
+                command.Parameters.AddWithValue("@Role", user.Role ?? "User");
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -119,6 +120,5 @@ namespace Bankamatik.DataAccess.Repositories
                 command.ExecuteNonQuery();
             }
         }
-
     }
 }

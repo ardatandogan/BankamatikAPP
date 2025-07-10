@@ -1,6 +1,6 @@
 ﻿namespace BankamatikFormApp
 {
-    partial class Form2
+    partial class LoginForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -33,33 +33,35 @@
             button1 = new Button();
             panel1 = new Panel();
             panel2 = new Panel();
+            label1 = new Label();
+            label2 = new Label();
             SuspendLayout();
             // 
             // textBox1
             // 
             textBox1.BackColor = Color.White;
             textBox1.BorderStyle = BorderStyle.None;
-            textBox1.Location = new Point(201, 170);
+            textBox1.Location = new Point(201, 171);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(223, 20);
             textBox1.TabIndex = 0;
-            textBox1.Text = "arda123";
+            textBox1.Text = "admin";
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(201, 227);
+            textBox2.Location = new Point(201, 245);
             textBox2.Name = "textBox2";
             textBox2.PasswordChar = '*';
             textBox2.Size = new Size(223, 27);
             textBox2.TabIndex = 1;
-            textBox2.Text = "1";
+            textBox2.Text = "admin";
             // 
             // button1
             // 
             button1.ForeColor = Color.Black;
-            button1.Location = new Point(252, 278);
+            button1.Location = new Point(248, 300);
             button1.Name = "button1";
-            button1.Size = new Size(120, 51);
+            button1.Size = new Size(121, 51);
             button1.TabIndex = 2;
             button1.Text = "Login";
             button1.UseVisualStyleBackColor = true;
@@ -76,17 +78,42 @@
             // panel2
             // 
             panel2.BackColor = Color.Black;
-            panel2.Location = new Point(201, 260);
+            panel2.Location = new Point(201, 277);
             panel2.Name = "panel2";
             panel2.Size = new Size(223, 1);
             panel2.TabIndex = 4;
             // 
-            // Form2
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.BackColor = Color.Transparent;
+            label1.Font = new Font("Segoe UI Semibold", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            label1.ForeColor = Color.Black;
+            label1.Location = new Point(195, 141);
+            label1.Name = "label1";
+            label1.Size = new Size(96, 25);
+            label1.TabIndex = 5;
+            label1.Text = "Username";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI Semibold", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            label2.ForeColor = Color.Black;
+            label2.Location = new Point(195, 217);
+            label2.Name = "label2";
+            label2.Size = new Size(90, 25);
+            label2.TabIndex = 6;
+            label2.Text = "Password";
+            // 
+            // LoginForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.LightSeaGreen;
+            BackColor = Color.SkyBlue;
             ClientSize = new Size(613, 533);
+            Controls.Add(label2);
+            Controls.Add(label1);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Controls.Add(button1);
@@ -94,7 +121,7 @@
             Controls.Add(textBox1);
             ForeColor = Color.AntiqueWhite;
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Name = "Form2";
+            Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Form1";
             ResumeLayout(false);
@@ -108,5 +135,7 @@
         private Button button1;
         private Panel panel1;
         private Panel panel2;
+        private Label label1;
+        private Label label2;
     }
 }

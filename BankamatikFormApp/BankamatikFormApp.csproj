@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bankamatik.Business\Bankamatik.Business.csproj" />
     <ProjectReference Include="..\Bankamatik.Core\Bankamatik.Core.csproj" />
     <ProjectReference Include="..\Bankamatik.DataAccess\Bankamatik.DataAccess.csproj" />

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bankamatik.API", "Bankamati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankamatikFormApp", "BankamatikFormApp\BankamatikFormApp.csproj", "{FCDB835F-CAC2-43CD-9529-5F6127DA7AAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankamatikConsoleApp", "BankamatikConsoleApp\BankamatikConsoleApp.csproj", "{4611BD42-5D1C-4CE1-B7A8-16CD31AE65F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FCDB835F-CAC2-43CD-9529-5F6127DA7AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCDB835F-CAC2-43CD-9529-5F6127DA7AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCDB835F-CAC2-43CD-9529-5F6127DA7AAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4611BD42-5D1C-4CE1-B7A8-16CD31AE65F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4611BD42-5D1C-4CE1-B7A8-16CD31AE65F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4611BD42-5D1C-4CE1-B7A8-16CD31AE65F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4611BD42-5D1C-4CE1-B7A8-16CD31AE65F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

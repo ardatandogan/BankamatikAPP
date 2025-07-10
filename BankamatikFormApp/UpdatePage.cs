@@ -1,4 +1,5 @@
-﻿using Bankamatik.Business.Services;
+﻿using Bankamatik.Business;
+using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
 using Bankamatik.DataAccess.Repositories;
 using System;
@@ -25,8 +26,21 @@ namespace BankamatikFormApp
 
         private void btnUpdateUsername_Click(object sender, EventArgs e)
         {
-            CurrentUser.PasswordHash = txtPasswordHash.Text;
-            MessageBox.Show(userService.UpdateUser(CurrentUser));
+            try
+            {
+                CurrentUser.PasswordHash = txtPasswordHash.Text;
+                userService.UpdateUser(CurrentUser);
+
+                // Log ekle
+                LogService logService = new LogService(new LogRepository());
+                logService.InsertLog(CurrentUser.ID, "Update", $"User updated: ID={CurrentUser.ID}, Username={CurrentUser.Username}");
+
+                MessageBox.Show("User updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating user: {ex.Message}");
+            }
         }
 
         private void UpdatePage_Load(object sender, EventArgs e)

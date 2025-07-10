@@ -5,24 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
+
 namespace Bankamatik.Business.Services
 {
     public class UserService
     {
         private readonly UserRepository _userRepository;
-
         public UserService(UserRepository userRepository)
         {
             _userRepository = userRepository;
         }
-
         public UserService()
         {
         }
 
-        //dependency injection nedir : nesneyi dışarıdan alarak bağımlılığı azaltmak 
-
-        //tüm kullanıcılar
         public List<User> GetAllUsers()
         {
             return _userRepository.GetUsers();
@@ -33,56 +29,21 @@ namespace Bankamatik.Business.Services
         {
             return _userRepository.GetUser(user);
         }
-
-        //create user kontrolleri en az 8 karakter - boş olamaz - aynı isimde kullanıcı olamaz
-        public void CreateUser(User user)
+        public string CreateUser(User user)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(user.Username))
-                    throw new ArgumentException("Username cannot be empty.");
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine("Username error: " + ex.Message);
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(user.Username))
+                return "Username cannot be empty.";
 
-            try
-            {
-                if (user.PasswordHash.Length < 8)
-                    throw new ArgumentException("Password too short.");
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine("Password error: " + ex.Message);
-                return;
-            }
+            if (user.PasswordHash.Length < 8)
+                return "Password must be at least 8 characters long.";
 
-            try
-            {
-                var existingUser = _userRepository.GetUser(new User { Username = user.Username });
-                if (existingUser != null)
-                    throw new InvalidOperationException("User already exists.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine("Duplicate user: " + ex.Message);
-                return;
-            }
+            var existingUser = _userRepository.GetUser(new User { Username = user.Username });
+            if (existingUser != null)
+                return "This username is already taken.";
 
-            try
-            {
-                _userRepository.InsertUser(user);
-                Console.WriteLine("User created successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Database error: " + ex.Message);
-            }
+            _userRepository.InsertUser(user);
+            return "success";
         }
-
-
 
         public string UpdateUser(User user)
         {
@@ -114,22 +75,13 @@ namespace Bankamatik.Business.Services
             try
             {
                 _userRepository.DeleteUser(user);
-                Console.WriteLine("User successfully deleted.");
-            }
-            catch (ArgumentNullException ex)
-            {
-                Console.WriteLine($"User is null: {ex.Message}");
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine($"Database error while deleting user: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error occurred while deleting user: {ex.Message}");
-
+                throw new Exception($"Error occurred while deleting user: {ex.Message}", ex);
             }
         }
+
 
 
     }

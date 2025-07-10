@@ -16,7 +16,6 @@ namespace Bankamatik.DataAccess.Repositories
         }
 
         // GET LIST
-        //dynamik sql ekstra 
         public List<Transaction> GetTransactions(Transaction transaction)
         {
             var transactions = new List<Transaction>();
@@ -141,6 +140,20 @@ namespace Bankamatik.DataAccess.Repositories
                 }
             }
         }
+        public void DeleteTransactionsByAccountId(int accountId)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "DELETE FROM Transactions WHERE FromAccountID = @AccountID OR ToAccountID = @AccountID";
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@AccountID", accountId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
 
     }
 }
