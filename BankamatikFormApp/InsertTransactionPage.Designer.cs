@@ -43,6 +43,7 @@
             txtFromAccountID.Name = "txtFromAccountID";
             txtFromAccountID.Size = new Size(164, 27);
             txtFromAccountID.TabIndex = 0;
+            txtFromAccountID.Validating += txtFromAccountID_Validating;
             // 
             // txtToAccountID
             // 
@@ -109,6 +110,7 @@
             Controls.Add(txtFromAccountID);
             Name = "InsertTransactionPage";
             Text = "InsertTransactionPage";
+            Load += InsertTransactionPage_Load;
             ResumeLayout(false);
             PerformLayout();
         }

@@ -35,6 +35,8 @@
             lbl_Balance = new Label();
             lbl_ID = new Label();
             btn_InsertAccount = new Button();
+            comboBox1 = new ComboBox();
+            lbl_ParaCinsi = new Label();
             SuspendLayout();
             // 
             // txtUserID
@@ -88,7 +90,7 @@
             // 
             // btn_InsertAccount
             // 
-            btn_InsertAccount.Location = new Point(195, 212);
+            btn_InsertAccount.Location = new Point(194, 263);
             btn_InsertAccount.Name = "btn_InsertAccount";
             btn_InsertAccount.Size = new Size(113, 29);
             btn_InsertAccount.TabIndex = 6;
@@ -96,11 +98,30 @@
             btn_InsertAccount.UseVisualStyleBackColor = true;
             btn_InsertAccount.Click += btn_InsertAccount_Click;
             // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(152, 214);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(198, 28);
+            comboBox1.TabIndex = 7;
+            // 
+            // lbl_ParaCinsi
+            // 
+            lbl_ParaCinsi.AutoSize = true;
+            lbl_ParaCinsi.Location = new Point(74, 217);
+            lbl_ParaCinsi.Name = "lbl_ParaCinsi";
+            lbl_ParaCinsi.Size = new Size(72, 20);
+            lbl_ParaCinsi.TabIndex = 8;
+            lbl_ParaCinsi.Text = "Para Cinsi";
+            // 
             // InsertAccount
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(458, 333);
+            Controls.Add(lbl_ParaCinsi);
+            Controls.Add(comboBox1);
             Controls.Add(btn_InsertAccount);
             Controls.Add(lbl_ID);
             Controls.Add(lbl_Balance);
@@ -124,5 +145,7 @@
         private Label lbl_Balance;
         private Label lbl_ID;
         private Button btn_InsertAccount;
+        private ComboBox comboBox1;
+        private Label lbl_ParaCinsi;
     }
 }

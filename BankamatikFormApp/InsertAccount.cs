@@ -2,6 +2,7 @@
 using Bankamatik.Core.Entities;
 using Bankamatik.DataAccess.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace BankamatikFormApp
@@ -11,6 +12,8 @@ namespace BankamatikFormApp
         private readonly AccountService accountService = new AccountService(new AccountRepository());
         private readonly LogService logService = new LogService(new LogRepository());
 
+        public User? CurrentUser { get; set; }
+
         public InsertAccount()
         {
             InitializeComponent();
@@ -18,7 +21,28 @@ namespace BankamatikFormApp
 
         private void InsertAccount_Load(object sender, EventArgs e)
         {
+            var paraCinsleri = new List<string>
+    {
+        "TRY", "USD", "EUR", "GBP", "JPY", "CHF", "AUD", "CAD"
+    };
+            comboBox1.DataSource = paraCinsleri;
+
+            if (CurrentUser != null && CurrentUser.Role.Trim().ToLower() == "user")
+            {
+                txtUserID.Text = CurrentUser.ID.ToString();
+                txtUserID.Enabled = false;
+
+                // Balance aktif kalacak, kullanıcı girebilir
+                txtAccountBalance.Enabled = true;
+            }
+            else
+            {
+                txtUserID.Enabled = true;
+                txtAccountBalance.Enabled = true;
+            }
         }
+
+
 
         private void btn_InsertAccount_Click(object sender, EventArgs e)
         {
@@ -49,10 +73,19 @@ namespace BankamatikFormApp
                 return;
             }
 
+            if (comboBox1.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a currency.");
+                return;
+            }
+
+            string paraCinsi = comboBox1.SelectedItem.ToString();
+
             var newAccount = new Account
             {
                 UserID = userId,
                 Balance = balance,
+                ParaCinsi = paraCinsi,
                 CreatedAt = DateTime.Now
             };
 
@@ -61,7 +94,7 @@ namespace BankamatikFormApp
                 accountService.CreateAccount(newAccount);
 
                 // Log kaydı
-                logService.InsertLog(userId, "Create", $"New account created for user {userId} with balance {balance}");
+                logService.InsertLog(userId, "Create", $"New account created for user {userId} with balance {balance} and currency {paraCinsi}");
 
                 MessageBox.Show("Account inserted successfully.");
                 this.Close();

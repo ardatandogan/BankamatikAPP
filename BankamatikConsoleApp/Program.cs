@@ -2,6 +2,8 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using Bankamatik.Business.Services;
+using Bankamatik.Core.Entities;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -11,68 +13,62 @@ namespace LogMailerApp
 {
     internal class Program
     {
+
+        private static LogService logService = new LogService(new Bankamatik.DataAccess.Repositories.LogRepository());
         static void Main(string[] args)
         {
             SendMail();
             Console.WriteLine("COMPLETE. PRESS ANY KEY TO CLOSE.");
             Console.ReadKey();
         }
-
         static void SendMail()
         {
-            string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
-
-            var logs = GetTodaysLogs(connectionString);
-
-            if (logs.Rows.Count == 0)
+            DateTime suankiZaman = DateTime.Now;
+            var logs = logService.GetLogsByFilters(new Log()
             {
-                Console.WriteLine("No Log For Today.");
-                return;
+                StartDate = new DateTime(suankiZaman.Year, suankiZaman.Month, suankiZaman.Day),
+                EndDate = new DateTime(suankiZaman.Year, suankiZaman.Month, suankiZaman.Day),
+            });
+            if (logs.Count > 0)
+            {
+
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Arda Tandogan", "ardavb4545@gmail.com"));
+                message.To.Add(new MailboxAddress("Kendim", "ardavb4545@gmail.com"));
+                message.Subject = $"Log Kaydı: {DateTime.Now:yyyy-MM-dd}";
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = BuildHtmlBody(logs)
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                try
+                {
+                    client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                    client.Authenticate("ardavb4545@gmail.com", "uazsehhtzezncasq");
+                    client.Send(message);
+                    client.Disconnect(true);
+
+                    Console.WriteLine("Mail sent succesfully.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Mail send error: " + ex.Message);
+                }
             }
 
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Arda Tandogan", "ardavb4545@gmail.com"));
-            message.To.Add(new MailboxAddress("Kendim", "ardavb4545@gmail.com"));
-            message.Subject = $"Log Kaydı: {DateTime.Now:yyyyMMdd}";
-
-            var bodyBuilder = new BodyBuilder
+            else
             {
-                HtmlBody = BuildHtmlBody(logs)
-            };
-
-            message.Body = bodyBuilder.ToMessageBody();
-
-            using var client = new SmtpClient();
-            try
-            {
-                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                client.Authenticate("ardavb4545@gmail.com", "uazsehhtzezncasq");
-                client.Send(message);
-                client.Disconnect(true);
-
-                Console.WriteLine("Mail sent succesfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Mail send error: " + ex.Message);
+                Console.WriteLine( "log kaydi yok");
             }
         }
 
-        static DataTable GetTodaysLogs(string connectionString)
-        {
-            var dt = new DataTable();
 
-            using var conn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("SELECT LogID, UserID, ActionType, Description, CreatedAt FROM Logs WHERE CAST(CreatedAt AS DATE) = CAST(GETDATE() AS DATE)", conn);
-
-            conn.Open();
-            using var reader = cmd.ExecuteReader();
-            dt.Load(reader);
-
-            return dt;
-        }
-
-        static string BuildHtmlBody(DataTable logs)
+        static string BuildHtmlBody(List<Log> logListesi)
         {
             var sb = new StringBuilder();
 
@@ -93,16 +89,21 @@ namespace LogMailerApp
             sb.AppendLine("<table>");
             sb.AppendLine("<thead><tr>");
 
-            foreach (DataColumn col in logs.Columns)
-                sb.AppendFormat("<th>{0}</th>", col.ColumnName);
-
+            sb.AppendLine("<th>LogID</th>");
+            sb.AppendLine("<th>UserID</th>");
+            sb.AppendLine("<th>ActionType</th>");
+            sb.AppendLine("<th>Description</th>");
+            sb.AppendLine("<th>CreatedAt</th>");
             sb.AppendLine("</tr></thead><tbody>");
 
-            foreach (DataRow row in logs.Rows)
+            foreach (var log in logListesi)
             {
                 sb.AppendLine("<tr>");
-                foreach (var item in row.ItemArray)
-                    sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(item?.ToString() ?? ""));
+                sb.AppendFormat("<td>{0}</td>", log.LogID);
+                sb.AppendFormat("<td>{0}</td>", log.UserID?.ToString() ?? "NULL");
+                sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(log.ActionType));
+                sb.AppendFormat("<td>{0}</td>", System.Net.WebUtility.HtmlEncode(log.Description));
+                sb.AppendFormat("<td>{0}</td>", log.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"));
                 sb.AppendLine("</tr>");
             }
 
@@ -111,5 +112,9 @@ namespace LogMailerApp
 
             return sb.ToString();
         }
+
+
+
     }
+
 }

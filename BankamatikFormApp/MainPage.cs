@@ -1,30 +1,88 @@
 ﻿using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
 using Bankamatik.DataAccess.Repositories;
+using ClosedXML.Excel;
 using System;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using ClosedXML.Excel;
 namespace BankamatikFormApp
 {
     public partial class MainPage : Form
     {
-        public User CurrentUser { get; set; } // Login sonrası atanmalı
+        public User CurrentUser { get; set; }
         private GridTheme userTheme = GridTheme.Default;
+
 
         AccountService accountService = new AccountService(new AccountRepository());
         UserService userService = new UserService(new UserRepository());
         TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
         LogService logService = new LogService(new LogRepository());
 
+
+
         public MainPage()
         {
+
             InitializeComponent();
+
         }
+
 
         private void MainPage_Load(object sender, EventArgs e)
         {
+            if (CurrentUser == null)
+            {
+                textBox4.Text = "USER is null!";
+                return;
+            }
+            LoadTransactionsGrid();
+
+            textBox4.Text = $"USER: {CurrentUser.Username} ROLE: {CurrentUser.Role}";
+
+            string? role = CurrentUser?.Role?.Trim().ToLower();
+
+            if (role != "admin")
+            {
+                tabControl1.TabPages.Remove(tabPage2);
+                tabControl1.TabPages.Remove(tabLogs);
+
+                btn_InsertUserPage.Visible = false;
+                btn_DeleteUser.Visible = false;
+                btn_DeleteAccount.Visible = false;
+                btn_DeleteTransaction.Visible = false;
+
+                textBox2.Enabled = false; // user search
+                textBox3.Enabled = false; // transaction search
+                txtUserID.Enabled = false; // log user id filter
+
+                // Account filtre textboxı sadece kendi userID'si, değiştirilemez
+                textBox1.Text = CurrentUser.ID.ToString();
+                textBox1.Enabled = false;
+            }
+            else
+            {
+                if (!tabControl1.TabPages.Contains(tabLogs))
+                    tabControl1.TabPages.Add(tabLogs);
+
+                btn_InsertUserPage.Visible = true;
+                btn_DeleteUser.Visible = true;
+                btn_DeleteAccount.Visible = true;
+                btn_DeleteTransaction.Visible = true;
+
+                textBox1.Enabled = true;
+                textBox2.Enabled = true;
+                textBox3.Enabled = true;
+                txtUserID.Enabled = true;
+            }
+
+            LoadAccountsGrid();
+            LoadTransactionsGrid();
+
+            dgvUsers.DataSource = userService.GetAllUsers();
+            dgvTransactions.Columns["AccountID"].Visible = false;
+            dgv_Logs.DataSource = logService.GetLogsByFilters(new Log());
+
             if (userTheme != GridTheme.Default)
             {
                 ApplyTheme(dgvAccounts, userTheme);
@@ -33,29 +91,56 @@ namespace BankamatikFormApp
                 ApplyTheme(dgv_Logs, userTheme);
             }
 
-            if (CurrentUser == null)
+            textBox4.Text += " || LOGS: Loaded: " + (dgv_Logs.DataSource as List<Log>)?.Count;
+        }
+
+        private void LoadAccountsGrid()
+        {
+            if (CurrentUser == null) return;
+
+            string role = CurrentUser.Role?.Trim().ToLower();
+
+            if (role == "user")
             {
-                textBox4.Text = "USER is null!";
+                dgvAccounts.DataSource = accountService.GetAccountsByUserId(new Account
+                {
+                    UserID = CurrentUser.ID
+                });
             }
             else
             {
-                textBox4.Text = $"USER: {CurrentUser.Username} ROLE: {CurrentUser.Role}";
-            }
-
-            dgvAccounts.DataSource = accountService.GetAccountsByUserId(new Account());
-            dgvUsers.DataSource = userService.GetAllUsers();
-            dgvTransactions.DataSource = transactionService.GetTransactions(new Transaction());
-            dgvTransactions.Columns["AccountID"].Visible = false;
-            dgv_Logs.DataSource = logService.GetAllLogs();
-
-            textBox4.Text += " || LOGS: Loaded: " + (dgv_Logs.DataSource as List<Log>)?.Count;
-            string? role = CurrentUser?.Role?.Trim().ToLower();
-
-            if (role != "admin")
-            {
-                tabControl1.TabPages.Remove(tabLogs);
+                dgvAccounts.DataSource = accountService.GetAccountsByUserId(new Account());
             }
         }
+
+        private void LoadTransactionsGrid()
+        {
+            if (CurrentUser == null) return;
+
+            string role = CurrentUser.Role?.Trim().ToLower();
+
+            if (role == "user")
+            {
+                // User'ın sadece kendi hesaplarına ait transactionları getir
+                var userAccounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
+                var userAccountIds = userAccounts.Select(a => a.AccountID).ToList();
+
+                var allTransactions = transactionService.GetTransactions(new Transaction());
+
+                var filteredTransactions = allTransactions
+                    .Where(t => userAccountIds.Contains(t.FromAccountID))
+                    .ToList();
+
+                dgvTransactions.DataSource = filteredTransactions;
+            }
+            else
+            {
+                // Admin ise tüm transactionları göster
+                dgvTransactions.DataSource = transactionService.GetTransactions(new Transaction());
+            }
+        }
+
+
 
 
         #region Search TextBoxları
@@ -92,6 +177,20 @@ namespace BankamatikFormApp
             dgvTransactions.DataSource = transactionService.GetTransactions(
                 new Transaction { AccountID = accountId == 0 ? null : accountId }
             );
+        }
+
+
+        private void txtUserID_TextChanged(object sender, EventArgs e)
+        {
+            var filteredLogs = logService.GetLogsByFilters(new Log()
+            {
+                UserID = string.IsNullOrEmpty(txtUserID.Text) ? 0 : Convert.ToInt32(txtUserID.Text)
+            });
+
+
+            dgv_Logs.DataSource = filteredLogs;
+            dgv_Logs.Columns.Remove("StartDate");
+            dgv_Logs.Columns.Remove("EndDate");
         }
         #endregion
 
@@ -134,19 +233,24 @@ namespace BankamatikFormApp
         private void btn_InsertAccount_Click(object sender, EventArgs e)
         {
             InsertAccount insertAccount = new InsertAccount();
+            insertAccount.CurrentUser = this.CurrentUser;
+
             insertAccount.ShowDialog();
 
-            dgvAccounts.DataSource = null;
-            dgvAccounts.DataSource = accountService.GetAccountsByUserId(new Account());
+            // Form kapandıktan sonra hesapları filtreli yükle
+            LoadAccountsGrid();
         }
+
+
 
         private void btn_InsertTransactionPage(object sender, EventArgs e)
         {
             InsertTransactionPage insertTransactionPage = new InsertTransactionPage();
+            insertTransactionPage.CurrentUser = this.CurrentUser;
             insertTransactionPage.ShowDialog();
 
-            dgvTransactions.DataSource = null;
-            dgvTransactions.DataSource = transactionService.GetTransactions(new Transaction());
+            // Transactionları rol bazlı yükle
+            LoadTransactionsGrid();
         }
 
         private void btn_DeleteAccount_Click(object sender, EventArgs e)
@@ -616,8 +720,29 @@ namespace BankamatikFormApp
         #endregion
 
 
+        private void btn_WithDraw_Click(object sender, EventArgs e)
+        {
+            if (comboBoxAccountSelection.SelectedItem is Account selectedAccount)
+            {
+                int accountId = selectedAccount.AccountID;
+                decimal amount = Convert.ToDecimal(txtAmount.Text.Trim());
 
+                // Withdraw işlemini başlat
+                // Burada transactionService.CreateTransaction çağırabilirsin
+                MessageBox.Show($"HesapID: {accountId} üzerinden {amount} TL çekiliyor.");
+            }
+        }
 
-       
+        private void btn_Deposit_Click(object sender, EventArgs e)
+        {
+            if (comboBoxAccountSelection.SelectedItem is Account selectedAccount)
+            {
+                int accountId = selectedAccount.AccountID;
+                decimal amount = Convert.ToDecimal(txtAmount.Text.Trim());
+
+                // Deposit işlemini başlat
+                MessageBox.Show($"HesapID: {accountId} üzerine {amount} TL yatırılıyor.");
+            }
+        }
     }
 }
