@@ -34,6 +34,8 @@ namespace BankamatikFormApp
                     return;
                 }
 
+                var logService = new LogService(new Bankamatik.DataAccess.Repositories.LogRepository());
+                logService.InsertLog(user.ID, "Login", $"{user.Username} logged in.");
                 MessageBox.Show("Login successful.", "Welcome", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 MainPage mainPage = new MainPage
@@ -44,6 +46,8 @@ namespace BankamatikFormApp
                 this.Hide(); // Login formu gizle
                 mainPage.ShowDialog();
                 this.Show(); // MainPage kapandýðýnda tekrar login formu göster
+
+
             }
             catch (Exception ex)
             {

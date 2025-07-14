@@ -21,7 +21,7 @@ namespace Bankamatik.DataAccess.Repositories
             var users = new List<User>();
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
-            using (SqlCommand command = new SqlCommand("sp_GetUsers", connection))
+            using (SqlCommand command = new SqlCommand(cmdText: "sp_GetUsers", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
 
@@ -35,7 +35,7 @@ namespace Bankamatik.DataAccess.Repositories
                             ID = Convert.ToInt32(reader["ID"]),
                             Username = reader["Username"].ToString() ?? "",
                             PasswordHash = reader["PasswordHash"].ToString() ?? "",
-                            Role = reader["Role"].ToString() ?? "User"  // Rolü oku, yoksa default "User"
+                            Role = reader["Role"].ToString() ?? "User"  
                         });
                     }
                 }

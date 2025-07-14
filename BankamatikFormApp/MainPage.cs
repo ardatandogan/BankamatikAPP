@@ -18,6 +18,8 @@ namespace BankamatikFormApp
         UserService userService = new UserService(new UserRepository());
         TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
         LogService logService = new LogService(new LogRepository());
+        KurService kurService = new KurService();
+
 
 
 
@@ -44,6 +46,8 @@ namespace BankamatikFormApp
 
             if (role != "admin")
             {
+                btn_ATM.Visible = true;
+
                 tabControl1.TabPages.Remove(tabPage2);
                 tabControl1.TabPages.Remove(tabLogs);
 
@@ -62,6 +66,8 @@ namespace BankamatikFormApp
             }
             else
             {
+                btn_ATM.Visible = false;
+
                 if (!tabControl1.TabPages.Contains(tabLogs))
                     tabControl1.TabPages.Add(tabLogs);
 
@@ -92,6 +98,15 @@ namespace BankamatikFormApp
             }
 
             textBox4.Text += " || LOGS: Loaded: " + (dgv_Logs.DataSource as List<Log>)?.Count;
+            var kurListesi = kurService.KurlariGetir();
+            dgvKurlar.DataSource = kurListesi;
+
+
+            if (dgv_Logs.Columns.Contains("StartDate"))
+                dgv_Logs.Columns["StartDate"].Visible = false;
+
+            if (dgv_Logs.Columns.Contains("EndDate"))
+                dgv_Logs.Columns["EndDate"].Visible = false;
         }
 
         private void LoadAccountsGrid()
@@ -294,6 +309,13 @@ namespace BankamatikFormApp
                 logService.InsertLog(CurrentUser.ID, "Logout", $"{CurrentUser.Username} has logged out.");
             }
         }
+
+        private void btn_ATM_Click(object sender, EventArgs e)
+        {
+            ATM atmPage = new ATM();
+            atmPage.CurrentUser = this.CurrentUser;
+            atmPage.ShowDialog();
+        }
         #endregion
 
         #region Exports
@@ -471,6 +493,55 @@ namespace BankamatikFormApp
                             for (int j = 0; j < dgvTransactions.Columns.Count; j++)
                             {
                                 worksheet.Cell(i + 2, j + 1).Value = dgvTransactions.Rows[i].Cells[j].Value?.ToString();
+                            }
+                        }
+
+                        try
+                        {
+                            workbook.SaveAs(sfd.FileName);
+                            MessageBox.Show("Export successful.", "Excel Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (IOException ioEx)
+                        {
+                            MessageBox.Show($"File in use or permission denied.\n\n{ioEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"An error occurred:\n\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void btn_ExportKurlar_Click(object sender, EventArgs e)
+        {
+            if (dgvKurlar.Rows.Count == 0)
+            {
+                MessageBox.Show("There is no data to export.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (SaveFileDialog sfd = new SaveFileDialog() { Filter = "Excel Workbook|*.xlsx" })
+            {
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Kurlar");
+
+                        // Kolon başlıkları
+                        for (int i = 0; i < dgvKurlar.Columns.Count; i++)
+                        {
+                            worksheet.Cell(1, i + 1).Value = dgvKurlar.Columns[i].HeaderText;
+                        }
+
+                        // Satır verileri
+                        for (int i = 0; i < dgvKurlar.Rows.Count; i++)
+                        {
+                            for (int j = 0; j < dgvKurlar.Columns.Count; j++)
+                            {
+                                worksheet.Cell(i + 2, j + 1).Value = dgvKurlar.Rows[i].Cells[j].Value?.ToString();
                             }
                         }
 
@@ -720,29 +791,9 @@ namespace BankamatikFormApp
         #endregion
 
 
-        private void btn_WithDraw_Click(object sender, EventArgs e)
-        {
-            if (comboBoxAccountSelection.SelectedItem is Account selectedAccount)
-            {
-                int accountId = selectedAccount.AccountID;
-                decimal amount = Convert.ToDecimal(txtAmount.Text.Trim());
 
-                // Withdraw işlemini başlat
-                // Burada transactionService.CreateTransaction çağırabilirsin
-                MessageBox.Show($"HesapID: {accountId} üzerinden {amount} TL çekiliyor.");
-            }
-        }
 
-        private void btn_Deposit_Click(object sender, EventArgs e)
-        {
-            if (comboBoxAccountSelection.SelectedItem is Account selectedAccount)
-            {
-                int accountId = selectedAccount.AccountID;
-                decimal amount = Convert.ToDecimal(txtAmount.Text.Trim());
 
-                // Deposit işlemini başlat
-                MessageBox.Show($"HesapID: {accountId} üzerine {amount} TL yatırılıyor.");
-            }
-        }
+
     }
 }

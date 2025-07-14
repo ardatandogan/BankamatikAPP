@@ -150,32 +150,6 @@ namespace Bankamatik.DataAccess.Repositories
             command.ExecuteNonQuery();
         }
 
-        public void DeleteAccountWithTransactions(int accountId)
-        {
-            using var connection = new SqlConnection(_connectionString);
-            connection.Open();
-
-            using var transaction = connection.BeginTransaction();
-
-            try
-            {
-                // Önce transactions sil
-                var deleteTransactionsCmd = new SqlCommand("DELETE FROM Transactions WHERE FromAccountID = @AccountID OR ToAccountID = @AccountID", connection, transaction);
-                deleteTransactionsCmd.Parameters.AddWithValue("@AccountID", accountId);
-                deleteTransactionsCmd.ExecuteNonQuery();
-
-                // Sonra account sil
-                var deleteAccountCmd = new SqlCommand("DELETE FROM Accounts WHERE AccountID = @AccountID", connection, transaction);
-                deleteAccountCmd.Parameters.AddWithValue("@AccountID", accountId);
-                deleteAccountCmd.ExecuteNonQuery();
-
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-        }
+        
     }
 }

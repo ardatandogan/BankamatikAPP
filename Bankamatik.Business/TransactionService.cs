@@ -28,11 +28,7 @@ namespace Bankamatik.Business.Services
 
         public void CreateTransaction(Transaction transaction)
         {
-            if (transaction.Amount <= 0)
-                throw new ArgumentException("Transaction amount must be positive.");
-
-            if (transaction.FromAccountID == transaction.ToAccountID)
-                throw new ArgumentException("Cannot transfer to the same account.");
+           
 
             var fromAccount = _accountRepository.GetAccountById(new Account { AccountID = transaction.FromAccountID });
             var toAccount = _accountRepository.GetAccountById(new Account { AccountID = transaction.ToAccountID });
