@@ -34,19 +34,19 @@ namespace BankamatikFormApp
         {
             if (!int.TryParse(txtAccountID.Text.Trim(), out int accountId))
             {
-                MessageBox.Show("Geçerli bir Account ID girin.");
+                MessageBox.Show("Invalid ID.");
                 return;
             }
 
             if (!decimal.TryParse(txtAmount.Text.Trim(), out decimal amount) || amount <= 0)
             {
-                MessageBox.Show("Geçerli bir miktar girin.");
+                MessageBox.Show("Invalid Amount.");
                 return;
             }
 
             if (!allowedAccountIds.Contains(accountId))
             {
-                MessageBox.Show("Sadece kendi hesaplarınızla işlem yapabilirsiniz.");
+                MessageBox.Show("You can only deposit to your own account.");
                 return;
             }
 
@@ -67,12 +67,12 @@ namespace BankamatikFormApp
                 logService.InsertLog(CurrentUser.ID, isDeposit ? "Deposit" : "Withdraw",
                     $"{accountId} hesabına işlem: {(isDeposit ? "+" : "-")}{amount}");
 
-                MessageBox.Show(isDeposit ? "Para yatırma başarılı." : "Para çekme başarılı.");
+                MessageBox.Show(isDeposit ? "Deposit succeed." : "Withdraw succeed.");
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Hata: {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}");
             }
         }
     

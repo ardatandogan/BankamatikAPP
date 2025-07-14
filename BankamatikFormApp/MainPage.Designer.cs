@@ -193,6 +193,7 @@
             // 
             // btn_LogOut
             // 
+            btn_LogOut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn_LogOut.BackColor = Color.Transparent;
             btn_LogOut.Location = new Point(1139, 4);
             btn_LogOut.Margin = new Padding(3, 4, 3, 4);
@@ -288,7 +289,7 @@
             // 
             // btn_ExportUsers
             // 
-            btn_ExportUsers.Location = new Point(726, 21);
+            btn_ExportUsers.Location = new Point(670, 20);
             btn_ExportUsers.Name = "btn_ExportUsers";
             btn_ExportUsers.Size = new Size(131, 29);
             btn_ExportUsers.TabIndex = 11;
@@ -298,7 +299,7 @@
             // 
             // btn_DeleteUser
             // 
-            btn_DeleteUser.Location = new Point(594, 21);
+            btn_DeleteUser.Location = new Point(542, 21);
             btn_DeleteUser.Name = "btn_DeleteUser";
             btn_DeleteUser.Size = new Size(111, 29);
             btn_DeleteUser.TabIndex = 10;
@@ -308,7 +309,7 @@
             // 
             // btn_InsertUserPage
             // 
-            btn_InsertUserPage.Location = new Point(475, 21);
+            btn_InsertUserPage.Location = new Point(421, 20);
             btn_InsertUserPage.Name = "btn_InsertUserPage";
             btn_InsertUserPage.Size = new Size(104, 29);
             btn_InsertUserPage.TabIndex = 9;
@@ -318,7 +319,7 @@
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(79, 21);
+            textBox2.Location = new Point(16, 21);
             textBox2.Name = "textBox2";
             textBox2.Size = new Size(375, 27);
             textBox2.TabIndex = 8;
@@ -383,7 +384,7 @@
             // 
             // btn_ExportTransactions
             // 
-            btn_ExportTransactions.Location = new Point(1087, 15);
+            btn_ExportTransactions.Location = new Point(937, 17);
             btn_ExportTransactions.Name = "btn_ExportTransactions";
             btn_ExportTransactions.Size = new Size(130, 31);
             btn_ExportTransactions.TabIndex = 11;
@@ -465,7 +466,7 @@
             // 
             // txtUserID
             // 
-            txtUserID.Location = new Point(85, 13);
+            txtUserID.Location = new Point(17, 10);
             txtUserID.Name = "txtUserID";
             txtUserID.Size = new Size(316, 27);
             txtUserID.TabIndex = 1;
@@ -473,9 +474,9 @@
             // 
             // btn_Export
             // 
-            btn_Export.Location = new Point(1108, 8);
+            btn_Export.Location = new Point(359, 10);
             btn_Export.Name = "btn_Export";
-            btn_Export.Size = new Size(134, 32);
+            btn_Export.Size = new Size(136, 29);
             btn_Export.TabIndex = 0;
             btn_Export.Text = "Export To Excel";
             btn_Export.UseVisualStyleBackColor = true;

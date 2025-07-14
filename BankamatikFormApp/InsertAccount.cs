@@ -23,7 +23,8 @@ namespace BankamatikFormApp
         {
             var paraCinsleri = new List<string>
     {
-        "TRY", "USD", "EUR", "GBP", "JPY", "CHF", "AUD", "CAD"
+        "USD", "AUD", "DKK", "EUR", "GBP", "CHF", "SEK", "CAD", "KWD", "NOK", "SAR", "JPY",
+        "BGN", "RON", "RUB", "CNY", "PKR", "QAR", "KRW", "AZN", "AED", "XDR"
     };
             comboBox1.DataSource = paraCinsleri;
 
@@ -32,7 +33,6 @@ namespace BankamatikFormApp
                 txtUserID.Text = CurrentUser.ID.ToString();
                 txtUserID.Enabled = false;
 
-                // Balance aktif kalacak, kullanıcı girebilir
                 txtAccountBalance.Enabled = true;
             }
             else
@@ -93,7 +93,7 @@ namespace BankamatikFormApp
             {
                 accountService.CreateAccount(newAccount);
 
-                // Log kaydı
+                // Log kaydı kaydedilip log tablosuna aktarılacak.
                 logService.InsertLog(userId, "Create", $"New account created for user {userId} with balance {balance} and currency {paraCinsi}");
 
                 MessageBox.Show("Account inserted successfully.");
