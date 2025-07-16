@@ -34,6 +34,11 @@ namespace Bankamatik.Business.Services
                             Satis = decimal.TryParse(item.Element("ForexSelling")?.Value.Replace('.', ','), out var satis) ? satis : 0,
                             Tarih = tarih
                         };
+                        if (kur.Kod == "JPY")
+                        {
+                            kur.Alis /= 100;
+                            kur.Satis /= 100;
+                        }
 
                         kurlar.Add(kur);
                     }
@@ -41,7 +46,6 @@ namespace Bankamatik.Business.Services
             }
             catch (Exception ex)
             {
-                // Hata loglanabilir
             }
 
             return kurlar;

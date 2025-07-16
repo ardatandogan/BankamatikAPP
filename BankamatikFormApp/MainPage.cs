@@ -10,8 +10,9 @@ namespace BankamatikFormApp
 {
     public partial class MainPage : Form
     {
+
         public User CurrentUser { get; set; }
-        private GridTheme userTheme = GridTheme.Default;
+        private GridTheme userTheme = GridTheme.Ice;
 
 
         AccountService accountService = new AccountService(new AccountRepository());
@@ -21,15 +22,12 @@ namespace BankamatikFormApp
         KurService kurService = new KurService();
 
 
-
-
         public MainPage()
         {
 
             InitializeComponent();
 
         }
-
 
         private void MainPage_Load(object sender, EventArgs e)
         {
@@ -275,6 +273,7 @@ namespace BankamatikFormApp
 
             dgvAccounts.DataSource = null;
             dgvAccounts.DataSource = accountService.GetAccountsByUserId(new Account());
+            //LoadAccountsGrid();
         }
 
         private void btn_DeleteUser_Click(object sender, EventArgs e)
@@ -284,6 +283,7 @@ namespace BankamatikFormApp
 
             dgvUsers.DataSource = null;
             dgvUsers.DataSource = userService.GetAllUsers();
+            
         }
 
         private void btn_DeleteTransaction_Click(object sender, EventArgs e)
@@ -315,6 +315,16 @@ namespace BankamatikFormApp
             ATM atmPage = new ATM();
             atmPage.CurrentUser = this.CurrentUser;
             atmPage.ShowDialog();
+        }
+
+        private void btn_CurrencyBuySell_Click(object sender, EventArgs e)
+        {
+            var currencyForm = new CurrencyBuySell
+            {
+                CurrentUser = this.CurrentUser  
+            };
+
+            currencyForm.ShowDialog();  
         }
         #endregion
 
@@ -794,6 +804,9 @@ namespace BankamatikFormApp
 
 
 
+
+
+       
 
     }
 }

@@ -20,7 +20,6 @@ namespace Bankamatik.Business.Services
             return _logRepository.GetLogsByFilters(log);
         }
 
-        // Belirli bir kullanıcıya ait logları getirir
         
 
         // Yeni log kaydı ekler

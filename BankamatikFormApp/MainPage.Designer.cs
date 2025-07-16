@@ -49,6 +49,7 @@
             dgvUsers = new DataGridView();
             tabPage3 = new TabPage();
             splitContainer3 = new SplitContainer();
+            btn_CurrencyBuySell = new Button();
             btn_ATM = new Button();
             btn_ExportTransactions = new Button();
             btn_DeleteTransaction = new Button();
@@ -359,6 +360,7 @@
             // 
             // splitContainer3.Panel1
             // 
+            splitContainer3.Panel1.Controls.Add(btn_CurrencyBuySell);
             splitContainer3.Panel1.Controls.Add(btn_ATM);
             splitContainer3.Panel1.Controls.Add(btn_ExportTransactions);
             splitContainer3.Panel1.Controls.Add(btn_DeleteTransaction);
@@ -372,9 +374,19 @@
             splitContainer3.SplitterDistance = 63;
             splitContainer3.TabIndex = 11;
             // 
+            // btn_CurrencyBuySell
+            // 
+            btn_CurrencyBuySell.Location = new Point(928, 17);
+            btn_CurrencyBuySell.Name = "btn_CurrencyBuySell";
+            btn_CurrencyBuySell.Size = new Size(163, 31);
+            btn_CurrencyBuySell.TabIndex = 13;
+            btn_CurrencyBuySell.Text = "Currency Buy/Sell";
+            btn_CurrencyBuySell.UseVisualStyleBackColor = true;
+            btn_CurrencyBuySell.Click += btn_CurrencyBuySell_Click;
+            // 
             // btn_ATM
             // 
-            btn_ATM.Location = new Point(766, 17);
+            btn_ATM.Location = new Point(763, 17);
             btn_ATM.Name = "btn_ATM";
             btn_ATM.Size = new Size(143, 31);
             btn_ATM.TabIndex = 12;
@@ -384,7 +396,7 @@
             // 
             // btn_ExportTransactions
             // 
-            btn_ExportTransactions.Location = new Point(937, 17);
+            btn_ExportTransactions.Location = new Point(1111, 17);
             btn_ExportTransactions.Name = "btn_ExportTransactions";
             btn_ExportTransactions.Size = new Size(130, 31);
             btn_ExportTransactions.TabIndex = 11;
@@ -394,7 +406,7 @@
             // 
             // btn_DeleteTransaction
             // 
-            btn_DeleteTransaction.Location = new Point(610, 17);
+            btn_DeleteTransaction.Location = new Point(611, 17);
             btn_DeleteTransaction.Name = "btn_DeleteTransaction";
             btn_DeleteTransaction.Size = new Size(130, 31);
             btn_DeleteTransaction.TabIndex = 10;
@@ -408,7 +420,7 @@
             btn_InsertTransaction.Name = "btn_InsertTransaction";
             btn_InsertTransaction.Size = new Size(138, 31);
             btn_InsertTransaction.TabIndex = 9;
-            btn_InsertTransaction.Text = "Insert Transaction";
+            btn_InsertTransaction.Text = "Send Money";
             btn_InsertTransaction.UseVisualStyleBackColor = true;
             btn_InsertTransaction.Click += btn_InsertTransactionPage;
             // 
@@ -660,5 +672,6 @@
         private DataGridView dgvKurlar;
         private Label label1;
         private Button button1;
+        private Button btn_CurrencyBuySell;
     }
 }
