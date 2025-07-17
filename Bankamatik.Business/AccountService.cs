@@ -20,6 +20,7 @@ namespace Bankamatik.Business.Services
             if (account.UserID != null)
                 filter.UserID = account.UserID;
 
+
             return _accountRepository.GetAccounts(filter);
         }
  

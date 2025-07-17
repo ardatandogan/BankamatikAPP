@@ -30,65 +30,85 @@ namespace BankamatikFormApp
 
         private void InsertTransactionPage_Load(object sender, EventArgs e)
         {
+            var accountService = new AccountService(new AccountRepository());
+
             if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user")
             {
-                var accountService = new AccountService(new AccountRepository()); // EKLE!
                 var userAccounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
+
                 allowedAccountIds = userAccounts.Select(a => a.AccountID).ToList();
+
+                // Sadece AccountID listesi
+                comboBoxFromAccount.DataSource = allowedAccountIds;
             }
             else
             {
-                allowedAccountIds = null; // Admin için kısıtlama yok
-            }
-        }
+                allowedAccountIds = null;
 
+                var allAccounts = accountService.GetAccountsByUserId(new Account()); // Tüm hesapları getiren metod varsa
+
+                var allAccountIds = allAccounts.Select(a => a.AccountID).ToList();
+
+                comboBoxFromAccount.DataSource = allAccountIds;
+            }
+
+        }
 
         private void btn_InsertTransaction_Click(object sender, EventArgs e)
         {
-            string fromAccountIdText = txtFromAccountID.Text.Trim();
-            string toAccountIdText = txtToAccountID.Text.Trim();
-            string amountText = txtAmount.Text.Trim();
+            var accountService = new AccountService(new AccountRepository());
 
-            if (string.IsNullOrEmpty(fromAccountIdText) || string.IsNullOrEmpty(toAccountIdText) || string.IsNullOrEmpty(amountText))
+            if (!int.TryParse(comboBoxFromAccount.SelectedValue?.ToString(), out int fromAccountId))
             {
-                MessageBox.Show("FromAccountID, ToAccountID, and Amount are required.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a valid From Account.");
                 return;
             }
 
-            if (!int.TryParse(fromAccountIdText, out int fromAccountId))
+            if (!int.TryParse(txtToAccountID.Text.Trim(), out int toAccountId))
             {
-                MessageBox.Show("FromAccountID must be a valid integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid To Account ID.");
                 return;
             }
 
-            if (!int.TryParse(toAccountIdText, out int toAccountId))
+            if (!decimal.TryParse(txtAmount.Text.Trim(), out decimal amount) || amount <= 0)
             {
-                MessageBox.Show("ToAccountID must be a valid integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid positive amount.");
                 return;
             }
 
-            if (!decimal.TryParse(amountText, out decimal amount))
+            // fromAccount'u veritabanından al
+            var fromAccount = accountService.GetAccountsByUserId(new Account())
+                                .FirstOrDefault(a => a.AccountID == fromAccountId);
+            if (fromAccount == null)
             {
-                MessageBox.Show("Amount must be a valid decimal number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("From Account not found.");
                 return;
             }
 
-            if (amount <= 0)
+            // toAccount'u veritabanından al
+            var toAccount = accountService.GetAccountsByUserId(new Account())
+                                .FirstOrDefault(a => a.AccountID == toAccountId);
+            if (toAccount == null)
             {
-                MessageBox.Show("Amount must be greater than zero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("To Account not found.");
                 return;
             }
 
-            // Kullanıcı rolü 'user' ise sadece kendi hesaplarından olan fromAccountId'yi kullanabilir
-            if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user" && allowedAccountIds != null)
+            // Para cinsi kontrolü
+            if (fromAccount.ParaCinsi != toAccount.ParaCinsi)
             {
-                if (!allowedAccountIds.Contains(fromAccountId))
-                {
-                    MessageBox.Show("You can only use your own Account IDs as FromAccountID.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                MessageBox.Show("From Account and To Account must have the same currency.");
+                return;
             }
 
+            // Yeterli bakiye kontrolü
+            if (fromAccount.Balance < amount)
+            {
+                MessageBox.Show("Insufficient balance in the From Account.");
+                return;
+            }
+
+            // İşlem oluşturma
             var newTransaction = new Transaction
             {
                 FromAccountID = fromAccountId,
@@ -99,36 +119,28 @@ namespace BankamatikFormApp
 
             try
             {
-                transactionService.CreateTransaction(newTransaction);
-                MessageBox.Show("Transaction inserted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                fromAccount.Balance -= amount;
+                toAccount.Balance += amount;
 
-                // Log kaydı
+                accountService.UpdateAccount(fromAccount);
+                accountService.UpdateAccount(toAccount);
+
+                transactionService.CreateTransaction(newTransaction);
+
                 logService.InsertLog(CurrentUser?.ID, "Create", $"Transaction inserted: From={fromAccountId}, To={toAccountId}, Amount={amount}");
 
+                MessageBox.Show("Transaction inserted successfully.");
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error inserting transaction: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error inserting transaction: {ex.Message}");
             }
         }
 
-        private void txtFromAccountID_Validating(object sender, CancelEventArgs e)
-        {
-            if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user")
-            {
-                if (int.TryParse(txtFromAccountID.Text.Trim(), out int enteredId))
-                {
-                    if (!allowedAccountIds.Contains(enteredId))
-                    {
-                        e.Cancel = true;
-                        MessageBox.Show("You are not allowed to use this Account ID. Please enter one of your own accounts.",
-                            "Unauthorized", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-            }
-        }
 
-       
+
+
+
     }
 }

@@ -28,20 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            txtAccountID = new TextBox();
             txtAmount = new TextBox();
             btn_Deposit = new Button();
             lbl_AccountID = new Label();
             lbl_Amount = new Label();
             btn_Withdraw = new Button();
+            comboBoxAccountID = new ComboBox();
             SuspendLayout();
-            // 
-            // txtAccountID
-            // 
-            txtAccountID.Location = new Point(198, 115);
-            txtAccountID.Name = "txtAccountID";
-            txtAccountID.Size = new Size(218, 27);
-            txtAccountID.TabIndex = 0;
             // 
             // txtAmount
             // 
@@ -88,17 +81,25 @@
             btn_Withdraw.UseVisualStyleBackColor = true;
             btn_Withdraw.Click += btn_Withdraw_Click;
             // 
+            // comboBoxAccountID
+            // 
+            comboBoxAccountID.FormattingEnabled = true;
+            comboBoxAccountID.Location = new Point(198, 115);
+            comboBoxAccountID.Name = "comboBoxAccountID";
+            comboBoxAccountID.Size = new Size(218, 28);
+            comboBoxAccountID.TabIndex = 6;
+            // 
             // ATM
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(584, 450);
+            Controls.Add(comboBoxAccountID);
             Controls.Add(btn_Withdraw);
             Controls.Add(lbl_Amount);
             Controls.Add(lbl_AccountID);
             Controls.Add(btn_Deposit);
             Controls.Add(txtAmount);
-            Controls.Add(txtAccountID);
             Name = "ATM";
             Text = "ATM";
             Load += ATM_Load;
@@ -107,12 +108,11 @@
         }
 
         #endregion
-
-        private TextBox txtAccountID;
         private TextBox txtAmount;
         private Button btn_Deposit;
         private Label lbl_AccountID;
         private Label lbl_Amount;
         private Button btn_Withdraw;
+        private ComboBox comboBoxAccountID;
     }
 }

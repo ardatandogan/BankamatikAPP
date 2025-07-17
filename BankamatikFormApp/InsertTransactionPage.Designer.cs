@@ -28,22 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            txtFromAccountID = new TextBox();
             txtToAccountID = new TextBox();
             txtAmount = new TextBox();
             btn_InsertTransaction = new Button();
             lbl_FromAccountID = new Label();
             lbl_ToAccountID = new Label();
             lbl_Amount = new Label();
+            comboBoxFromAccount = new ComboBox();
             SuspendLayout();
-            // 
-            // txtFromAccountID
-            // 
-            txtFromAccountID.Location = new Point(157, 62);
-            txtFromAccountID.Name = "txtFromAccountID";
-            txtFromAccountID.Size = new Size(164, 27);
-            txtFromAccountID.TabIndex = 0;
-            txtFromAccountID.Validating += txtFromAccountID_Validating;
             // 
             // txtToAccountID
             // 
@@ -96,18 +88,26 @@
             lbl_Amount.TabIndex = 6;
             lbl_Amount.Text = "Amount";
             // 
+            // comboBoxFromAccount
+            // 
+            comboBoxFromAccount.FormattingEnabled = true;
+            comboBoxFromAccount.Location = new Point(157, 65);
+            comboBoxFromAccount.Name = "comboBoxFromAccount";
+            comboBoxFromAccount.Size = new Size(164, 28);
+            comboBoxFromAccount.TabIndex = 7;
+            // 
             // InsertTransactionPage
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(446, 332);
+            Controls.Add(comboBoxFromAccount);
             Controls.Add(lbl_Amount);
             Controls.Add(lbl_ToAccountID);
             Controls.Add(lbl_FromAccountID);
             Controls.Add(btn_InsertTransaction);
             Controls.Add(txtAmount);
             Controls.Add(txtToAccountID);
-            Controls.Add(txtFromAccountID);
             Name = "InsertTransactionPage";
             Text = "InsertTransactionPage";
             Load += InsertTransactionPage_Load;
@@ -116,8 +116,6 @@
         }
 
         #endregion
-
-        private TextBox txtFromAccountID;
         private TextBox txtToAccountID;
         private TextBox txtAmount;
         private Button btn_InsertTransaction;
@@ -125,5 +123,6 @@
         private Label label2;
         private Label lbl_Amount;
         internal Label lbl_ToAccountID;
+        private ComboBox comboBoxFromAccount;
     }
 }

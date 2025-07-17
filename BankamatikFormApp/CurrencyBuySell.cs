@@ -17,6 +17,8 @@ namespace BankamatikFormApp
         private readonly LogService logService = new LogService(new LogRepository());
 
 
+
+
         public CurrencyBuySell()
         {
             InitializeComponent();
@@ -26,7 +28,7 @@ namespace BankamatikFormApp
         {
             try
             {
-                var accounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
+                List<Account>? accounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
 
                 // FromAccount combobox
                 var fromList = accounts.Select(a => new AccountDisplayItem
@@ -62,6 +64,8 @@ namespace BankamatikFormApp
 
         private void btn_Buy_Click(object sender, EventArgs e)
         {
+            const int BANK_USER_ID = 6006;
+
             if (comboBoxFromAccount.SelectedItem == null || comboBoxToAccount.SelectedItem == null ||
                 comboBoxCurrency.SelectedItem == null || !decimal.TryParse(txtAmount.Text.Trim(), out decimal amount))
             {
@@ -73,21 +77,18 @@ namespace BankamatikFormApp
             var toAccount = ((AccountDisplayItem)comboBoxToAccount.SelectedItem).Account;
             var currency = (Kur)comboBoxCurrency.SelectedItem;
 
-            // Buy: fromAccount ParaCinsi "TRY" olmalı (TL'den dövize)
             if (fromAccount.ParaCinsi != "TRY")
             {
                 MessageBox.Show("For buying currency, 'From Account' must be your TRY account.");
                 return;
             }
 
-            // ToAccount ParaCinsi seçilen döviz kodu olmalı
             if (toAccount.ParaCinsi != currency.Kod)
             {
                 MessageBox.Show($"'To Account' must be a {currency.Kod} account.");
                 return;
             }
 
-            // Kullanıcı sadece kendi hesaplarını seçebilir (kontrol)
             if (fromAccount.UserID != CurrentUser.ID || toAccount.UserID != CurrentUser.ID)
             {
                 MessageBox.Show("You can only select your own accounts.");
@@ -102,17 +103,35 @@ namespace BankamatikFormApp
                 return;
             }
 
+            // Bankanın ilgili döviz hesabı bulunur
+            var bankCurrencyAccount = accountService.GetAccountsByUserId(new Account())
+                .FirstOrDefault(a => a.UserID == BANK_USER_ID && a.ParaCinsi == currency.Kod);
+
+            if (bankCurrencyAccount == null || bankCurrencyAccount.Balance < amount)
+            {
+                MessageBox.Show("Bank does not have enough currency for this transaction.");
+                return;
+            }
+
+            // Kullanıcı bakiyeleri güncelle
             fromAccount.Balance -= totalCost;
             toAccount.Balance += amount;
-
             accountService.UpdateAccount(fromAccount);
             accountService.UpdateAccount(toAccount);
+
+            // Banka döviz bakiyesini düşür
+            bankCurrencyAccount.Balance -= amount;
+            accountService.UpdateAccount(bankCurrencyAccount);
+
             logService.InsertLog(CurrentUser.ID, "CurrencyBuy", $"Bought {amount} {currency.Kod} from AccountID {fromAccount.AccountID} to AccountID {toAccount.AccountID}");
             MessageBox.Show($"You bought {amount} {currency.Kod} for {totalCost} TRY.");
         }
 
+
         private void btn_Sell_Click(object sender, EventArgs e)
         {
+            const int BANK_USER_ID = 6006;
+
             if (comboBoxFromAccount.SelectedItem == null || comboBoxToAccount.SelectedItem == null ||
                 comboBoxCurrency.SelectedItem == null || !decimal.TryParse(txtAmount.Text.Trim(), out decimal amount))
             {
@@ -124,21 +143,18 @@ namespace BankamatikFormApp
             var toAccount = ((AccountDisplayItem)comboBoxToAccount.SelectedItem).Account;
             var currency = (Kur)comboBoxCurrency.SelectedItem;
 
-            // Sell: fromAccount ParaCinsi seçilen döviz olmalı (dövizi satıyor)
             if (fromAccount.ParaCinsi != currency.Kod)
             {
                 MessageBox.Show($"For selling, 'From Account' must be a {currency.Kod} account.");
                 return;
             }
 
-            // ToAccount ParaCinsi TRY olmalı (dövizi TL'ye satıyor)
             if (toAccount.ParaCinsi != "TRY")
             {
                 MessageBox.Show("'To Account' must be your TRY account.");
                 return;
             }
 
-            // Kullanıcı sadece kendi hesaplarını seçebilir
             if (fromAccount.UserID != CurrentUser.ID || toAccount.UserID != CurrentUser.ID)
             {
                 MessageBox.Show("You can only select your own accounts.");
@@ -153,15 +169,34 @@ namespace BankamatikFormApp
 
             decimal totalReturn = amount * currency.Satis;
 
+            // Bankanın ilgili TRY ve döviz hesabı bulunur
+            var bankCurrencyAccount = accountService.GetAccountsByUserId(new Account())
+                .FirstOrDefault(a => a.UserID == BANK_USER_ID && a.ParaCinsi == currency.Kod);
+            var bankTryAccount = accountService.GetAccountsByUserId(new Account())
+                .FirstOrDefault(a => a.UserID == BANK_USER_ID && a.ParaCinsi == "TRY");
+
+            if (bankCurrencyAccount == null || bankTryAccount == null || bankTryAccount.Balance < totalReturn)
+            {
+                MessageBox.Show("Bank cannot complete this transaction (not enough TRY).");
+                return;
+            }
+
+            // Kullanıcı hesapları güncelle
             fromAccount.Balance -= amount;
             toAccount.Balance += totalReturn;
-
             accountService.UpdateAccount(fromAccount);
             accountService.UpdateAccount(toAccount);
-            logService.InsertLog(CurrentUser.ID, "CurrencySell", $"Sold {amount} {currency.Kod} from AccountID {fromAccount.AccountID} to AccountID {toAccount.AccountID}");
 
+            // Banka hesapları güncelle
+            bankCurrencyAccount.Balance += amount;
+            bankTryAccount.Balance -= totalReturn;
+            accountService.UpdateAccount(bankCurrencyAccount);
+            accountService.UpdateAccount(bankTryAccount);
+
+            logService.InsertLog(CurrentUser.ID, "CurrencySell", $"Sold {amount} {currency.Kod} from AccountID {fromAccount.AccountID} to AccountID {toAccount.AccountID}");
             MessageBox.Show($"You sold {amount} {currency.Kod} and received {totalReturn} TRY.");
         }
+
 
         private class AccountDisplayItem
         {

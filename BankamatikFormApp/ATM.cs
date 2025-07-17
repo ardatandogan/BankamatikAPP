@@ -12,29 +12,33 @@ namespace BankamatikFormApp
     {
         public User CurrentUser { get; set; }
 
-        public ATM()
-        {
-            InitializeComponent();
-        }
         private List<int> allowedAccountIds = new List<int>();
         private readonly AccountService accountService = new AccountService(new AccountRepository());
         private readonly TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
         private readonly LogService logService = new LogService(new LogRepository());
+
+        public ATM()
+        {
+            InitializeComponent();
+        }
+
         private void ATM_Load(object sender, EventArgs e)
         {
-            // Sadece kullanıcı kendi hesapları üzerinden işlem yapabilsin
             if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user")
             {
                 var userAccounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
                 allowedAccountIds = userAccounts.Select(a => a.AccountID).ToList();
+
+                // Combobox'a sadece AccountID'leri yükle (para cinsi yok)
+                comboBoxAccountID.DataSource = allowedAccountIds;
             }
         }
 
         private void HandleTransaction(bool isDeposit)
         {
-            if (!int.TryParse(txtAccountID.Text.Trim(), out int accountId))
+            if (comboBoxAccountID.SelectedItem == null || !int.TryParse(comboBoxAccountID.SelectedItem.ToString(), out int accountId))
             {
-                MessageBox.Show("Invalid ID.");
+                MessageBox.Show("Please select a valid Account ID.");
                 return;
             }
 
@@ -46,7 +50,7 @@ namespace BankamatikFormApp
 
             if (!allowedAccountIds.Contains(accountId))
             {
-                MessageBox.Show("You can only deposit to your own account.");
+                MessageBox.Show("You can only transact on your own accounts.");
                 return;
             }
 
@@ -75,17 +79,15 @@ namespace BankamatikFormApp
                 MessageBox.Show($"Error: {ex.Message}");
             }
         }
-    
+
         private void btn_Deposit_Click(object sender, EventArgs e)
         {
             HandleTransaction(isDeposit: true);
-
         }
 
         private void btn_Withdraw_Click(object sender, EventArgs e)
         {
             HandleTransaction(isDeposit: false);
-
         }
     }
 }

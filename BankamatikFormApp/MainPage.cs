@@ -93,6 +93,7 @@ namespace BankamatikFormApp
                 ApplyTheme(dgvUsers, userTheme);
                 ApplyTheme(dgvTransactions, userTheme);
                 ApplyTheme(dgv_Logs, userTheme);
+                ApplyTheme(dgvKurlar, userTheme);
             }
 
             textBox4.Text += " || LOGS: Loaded: " + (dgv_Logs.DataSource as List<Log>)?.Count;

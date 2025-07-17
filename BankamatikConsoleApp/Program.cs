@@ -27,7 +27,7 @@ namespace LogMailerApp
             var logs = logService.GetLogsByFilters(new Log()
             {
                 StartDate = new DateTime(suankiZaman.Year, suankiZaman.Month, suankiZaman.Day),
-                EndDate = new DateTime(suankiZaman.Year, suankiZaman.Month, suankiZaman.Day),
+                EndDate = new DateTime(suankiZaman.Year, suankiZaman.Month, suankiZaman.Day).AddDays(1).AddTicks(-1),
             });
             if (logs.Count > 0)
             {
