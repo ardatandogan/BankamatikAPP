@@ -20,10 +20,11 @@ namespace Bankamatik.Business.Services
         }
 
         // 2. LogService ile kullanım
-        public LoanService(LoanRepository loanRepository, LogService logService)
+        public LoanService(LoanRepository loanRepository, LogService logService, AccountRepository accountRepository)
         {
             _loanRepository = loanRepository;
             _logService = logService;
+            _accountRepository = accountRepository;
         }
 
         // 3. AccountRepository + LogService ile kullanım

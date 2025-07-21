@@ -1,0 +1,12 @@
+﻿@model Bankamatik.Core.Entities.Account
+
+<h2>Hesap Sil</h2>
+
+<p><strong>Hesap ID: @Model.AccountID</strong> olan hesabı silmek istediğinizden emin misiniz?</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="AccountID" />
+    <input type="hidden" asp-for="UserID" />
+    <button type="submit" class="btn btn-danger">Sil</button>
+    <a asp-action="Index" asp-route-userId="@Model.UserID" class="btn btn-secondary">İptal</a>
+</form>

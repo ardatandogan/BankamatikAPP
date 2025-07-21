@@ -1,0 +1,9 @@
+﻿@{
+    ViewBag.Title = "Anasayfa";
+}
+
+<h2>Hoşgeldiniz, @ViewBag.Username!</h2>
+
+<p>Bankamatik uygulamasına giriş yaptınız.</p>
+
+<a href="@Url.Action("Logout", "Auth")">Çıkış Yap</a>

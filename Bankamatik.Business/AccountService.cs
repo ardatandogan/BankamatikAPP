@@ -23,7 +23,17 @@ namespace Bankamatik.Business.Services
             }
             return _accountRepository.GetAccounts(filter);
         }
- 
+
+        public Account GetAccountByAccountId(Account account)
+        {
+            Account? filter = new Account();
+            if (account.AccountID != 0)
+            {
+                filter.AccountID = account.AccountID;
+            }
+            return _accountRepository.GetAccounts(filter)?.FirstOrDefault();
+        }
+
         public void CreateAccount(Account account)
         {
             try

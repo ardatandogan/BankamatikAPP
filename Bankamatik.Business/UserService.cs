@@ -15,10 +15,7 @@ namespace Bankamatik.Business.Services
         {
             _userRepository = userRepository;
         }
-        public UserService()
-        {
-        }
-
+       
         public List<User> GetAllUsers()
         {
             return _userRepository.GetUsers();
@@ -70,6 +67,10 @@ namespace Bankamatik.Business.Services
             return sonuc;
         }
 
+        public User? GetUserById(User user)
+        { 
+                return _userRepository.GetUserById(user);
+        }
         public void DeleteUser(User user)
         {
             try

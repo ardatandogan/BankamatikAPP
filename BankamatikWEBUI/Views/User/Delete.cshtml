@@ -1,0 +1,11 @@
+﻿@model Bankamatik.Core.Entities.User
+
+<h2>Kullanıcıyı Sil</h2>
+
+<p><strong>@Model.Username</strong> adlı kullanıcıyı silmek istediğinizden emin misiniz?</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="ID" />
+    <button type="submit" class="btn btn-danger">Sil</button>
+    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>

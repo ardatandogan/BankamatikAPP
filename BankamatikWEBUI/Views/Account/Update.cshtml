@@ -1,0 +1,20 @@
+﻿@model Bankamatik.Core.Entities.Account
+
+<form method="post" asp-action="Update">
+    <input type="hidden" asp-for="AccountID" />
+    <input type="hidden" asp-for="UserID" />
+
+    <div class="form-group">
+        <label for="Balance">Bakiye</label>
+        <input asp-for="Balance" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="ParaCinsi">Para Cinsi</label>
+        <input asp-for="ParaCinsi" class="form-control" readonly />
+        <!-- Veya inputu gizlemek için aşağıdaki kullanılır -->
+        <!-- <input type="hidden" asp-for="ParaCinsi" /> -->
+    </div>
+
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+</form>

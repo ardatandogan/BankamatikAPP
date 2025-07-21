@@ -1,0 +1,40 @@
+﻿@model List<Bankamatik.Core.Entities.User>
+
+<h2>Users</h2>
+
+<!-- 🔍 Arama Formu -->
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <input type="text" name="search" class="form-control mr-2" placeholder="Kullanıcı adıyla ara..." value="@Context.Request.Query["search"]" />
+    <button type="submit" class="btn btn-secondary">Ara</button>
+</form>
+
+<!-- ➕ Yeni Kullanıcı Butonu -->
+<a class="btn btn-primary mb-3" asp-action="Insert">Yeni Kullanıcı Ekle</a>
+
+<!-- 📋 Kullanıcı Tablosu -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Kullanıcı Adı</th>
+            <th>Rol</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.Role</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" asp-action="Update" asp-route-id="@user.ID">Güncelle</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@user.ID">Sil</a>
+             
+                    <a asp-controller="Account" asp-action="Index" asp-route-userId="@user.ID" class="btn btn-sm btn-info">Hesaplar</a>
+              
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

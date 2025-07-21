@@ -120,5 +120,35 @@ namespace Bankamatik.DataAccess.Repositories
                 command.ExecuteNonQuery();
             }
         }
+
+        public User? GetUserById(User user)
+        {
+            User? result = null;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlCommand command = new SqlCommand("sp_GetUserById", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@ID", user.ID);
+
+                connection.Open();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        result = new User
+                        {
+                            ID = Convert.ToInt32(reader["ID"]),
+                            Username = reader["Username"].ToString() ?? "",
+                            PasswordHash = reader["PasswordHash"].ToString() ?? "",
+                            Role = reader["Role"].ToString() ?? "User"
+                        };
+                    }
+                }
+            }
+
+            return result;
+        }
+
     }
 }
