@@ -18,9 +18,9 @@ namespace Bankamatik.Business.Services
         {
             var filter = new Account();
             if (account.UserID != null)
+            {
                 filter.UserID = account.UserID;
-
-
+            }
             return _accountRepository.GetAccounts(filter);
         }
  

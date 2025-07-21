@@ -9,69 +9,74 @@ namespace Bankamatik.Business.Services
     public class LoanService
     {
         private readonly LoanRepository _loanRepository;
+        private readonly AccountRepository _accountRepository;
+        private readonly LogService _logService;
 
+        // 1. Geri uyumlu constructor (sadece LoanRepository)
         public LoanService(LoanRepository loanRepository)
         {
             _loanRepository = loanRepository;
+            _logService = new LogService(new LogRepository()); // Default log servisi
         }
 
-
-        public bool AddLoan(Loan loan)
+        // 2. LogService ile kullanım
+        public LoanService(LoanRepository loanRepository, LogService logService)
         {
-            return _loanRepository.InsertLoan(loan);
+            _loanRepository = loanRepository;
+            _logService = logService;
         }
 
-        public bool UpdateLoan(Loan loan)
+        // 3. AccountRepository + LogService ile kullanım
+        public LoanService(LoanRepository loanRepository, AccountRepository accountRepository, LogService logService)
         {
-            return _loanRepository.UpdateLoan(loan);
+            _loanRepository = loanRepository;
+            _accountRepository = accountRepository;
+            _logService = logService;
         }
 
-        
-        public bool DeleteLoan(int loanId)
+        public void InsertLoan(Loan loan)
         {
-            return _loanRepository.DeleteLoan(loanId);
+            _loanRepository.InsertLoan(loan);
+            _logService?.InsertLog(loan.UserID, "InsertLoan",
+                $"Loan inserted: Amount={loan.Amount}, InterestRate={loan.InterestRate}%, StartDate={loan.StartDate:yyyy-MM-dd}");
         }
 
- 
+        public void UpdateLoan(Loan loan)
+        {
+            _loanRepository.UpdateLoan(loan);
+            _logService?.InsertLog(loan.UserID, "UpdateLoan",
+                $"Loan updated: LoanID={loan.LoanID}, NewAmount={loan.Amount}, Status={loan.Status}");
+        }
+
+        public void DeleteLoan(Loan loan)
+        {
+            _loanRepository.DeleteLoan(loan);
+            _logService?.InsertLog(loan.UserID, "DeleteLoan",
+                $"Loan deleted: LoanID={loan.LoanID}");
+        }
+
         public List<Loan> GetLoans(Loan loan)
         {
             return _loanRepository.GetLoans(loan);
         }
 
-        // suanki loanları listeye dönüştür
         public List<Loan> GetActiveLoans(Loan loan)
         {
-            var allLoans = _loanRepository.GetLoans(new Loan { UserID = loan.UserID });
+            List<Loan> allLoans = GetLoans(new Loan { UserID = loan.UserID });
             return allLoans.Where(l => l.Status == "Active").ToList();
         }
 
-        // enddatei gecmis kredisi aktif mi
-        public bool HasOverdueLoans(Loan loan)
+        public List<Loan> GetOverdueLoans(Loan loan)
         {
-            var loans = _loanRepository.GetLoans(new Loan { UserID = loan.UserID });
-            var now = DateTime.Now;
-            return loans.Any(l => l.EndDate < now && l.Status == "Active");
+            List<Loan> loans = GetLoans(new Loan { UserID = loan.UserID });
+            DateTime now = DateTime.Now;
+            return loans.Where(l => l.EndDate < now && l.Status == "Active").ToList();
         }
 
         public decimal CalculateInterestAmount(Loan loan)
         {
-            //kac yıl oldugunu hesaplıyor.
             double totalYears = (loan.EndDate - loan.StartDate).TotalDays / 365.0;
             return loan.Amount * loan.InterestRate * (decimal)totalYears;
         }
-
-        // geri ödeme miktarı
-        public decimal CalculateTotalRepayment(Loan loan)
-        {
-            return loan.Amount + CalculateInterestAmount(loan);
-        }
-
-        // paid ise:
-        public bool MarkLoanAsPaid(int loanId)
-        {
-            return _loanRepository.UpdateLoanStatus(loanId, "Paid");
-        }
-
-
     }
 }

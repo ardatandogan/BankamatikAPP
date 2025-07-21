@@ -1,32 +1,37 @@
 ﻿using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
 using Bankamatik.DataAccess.Repositories;
+using BankamatikFormApp.LoanPages;
 using ClosedXML.Excel;
 using System;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace BankamatikFormApp
 {
+
+    //TODO: PAY LOAN YAPILACAK.
+    //TODO: DEBUGGING YAP UYGULAMA CRASH VERMESİN.
+    //TODO: OTOMATİK OLARAK INTEREST RATE VERİLECEK. BAKİYEN ALDIGIN KREDİNİN 10 KATIYSA O ZAMAN MINIMUM INTEREST RATE DEGILSE MAX GİBİ.
+    //TODO: .net extension methods.(BUNA BAK!!!!)
+
+
     public partial class MainPage : Form
     {
-
         public User CurrentUser { get; set; }
         private GridTheme userTheme = GridTheme.Ice;
-
 
         AccountService accountService = new AccountService(new AccountRepository());
         UserService userService = new UserService(new UserRepository());
         TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
         LogService logService = new LogService(new LogRepository());
         KurService kurService = new KurService();
-
+        LoanService loanService = new LoanService(new LoanRepository());
 
         public MainPage()
         {
-
             InitializeComponent();
-
         }
 
         private void MainPage_Load(object sender, EventArgs e)
@@ -44,7 +49,7 @@ namespace BankamatikFormApp
 
             if (role != "admin")
             {
-                btn_ATM.Visible = true;
+
 
                 tabControl1.TabPages.Remove(tabPage2);
                 tabControl1.TabPages.Remove(tabLogs);
@@ -64,7 +69,7 @@ namespace BankamatikFormApp
             }
             else
             {
-                btn_ATM.Visible = false;
+
 
                 if (!tabControl1.TabPages.Contains(tabLogs))
                     tabControl1.TabPages.Add(tabLogs);
@@ -94,6 +99,7 @@ namespace BankamatikFormApp
                 ApplyTheme(dgvTransactions, userTheme);
                 ApplyTheme(dgv_Logs, userTheme);
                 ApplyTheme(dgvKurlar, userTheme);
+                ApplyTheme(dgv_Loans, userTheme);
             }
 
             textBox4.Text += " || LOGS: Loaded: " + (dgv_Logs.DataSource as List<Log>)?.Count;
@@ -106,6 +112,20 @@ namespace BankamatikFormApp
 
             if (dgv_Logs.Columns.Contains("EndDate"))
                 dgv_Logs.Columns["EndDate"].Visible = false;
+
+
+            cmbLoanFilter.Items.AddRange(["All", "Active", "Paid"]);
+            cmbLoanFilter.SelectedIndex = 0;
+            LoadLoans();
+
+            if (CurrentUser.Role == "Admin")
+            {
+                comboBoxAccountID.DataSource = accountService.GetAccountsByUserId(new Account()).Select(a => a.AccountID).ToList();
+            }
+            else if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user")
+            {
+                comboBoxAccountID.DataSource = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList();
+            }
         }
 
         private void LoadAccountsGrid()
@@ -154,8 +174,31 @@ namespace BankamatikFormApp
             }
         }
 
+        private void LoadLoans()
+        {
+            var filter = cmbLoanFilter.SelectedItem.ToString();
+            List<Loan>? loans = new List<Loan>();
 
+            if (CurrentUser.Role == "Admin")
+            {
+                loans = loanService.GetLoans(new Loan());
+            }
+            else
+            {
+                loans = loanService.GetLoans(new Loan { UserID = CurrentUser.ID });
+            }
 
+            if (filter == "Active")
+            {
+                loans = loans.Where(l => l.Status == "Active").ToList();
+            }
+            else if (filter == "Paid")
+            {
+                loans = loans.Where(l => l.Status == "Paid").ToList();
+            }
+
+            dgv_Loans.DataSource = loans;
+        }
 
         #region Search TextBoxları
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -208,7 +251,6 @@ namespace BankamatikFormApp
         }
         #endregion
 
-
         #region Double Click Event'leri
 
         private void dgvUsers_DoubleClick(object sender, EventArgs e)
@@ -234,8 +276,8 @@ namespace BankamatikFormApp
 
         #endregion
 
-
         #region ButtonClicks
+
         private void btn_InsertUser_Click(object sender, EventArgs e)
         {
             InsertUserPage insertUserPage = new InsertUserPage();
@@ -254,8 +296,6 @@ namespace BankamatikFormApp
             // Form kapandıktan sonra hesapları filtreli yükle
             LoadAccountsGrid();
         }
-
-
 
         private void btn_InsertTransactionPage(object sender, EventArgs e)
         {
@@ -284,7 +324,7 @@ namespace BankamatikFormApp
 
             dgvUsers.DataSource = null;
             dgvUsers.DataSource = userService.GetAllUsers();
-            
+
         }
 
         private void btn_DeleteTransaction_Click(object sender, EventArgs e)
@@ -311,22 +351,25 @@ namespace BankamatikFormApp
             }
         }
 
-        private void btn_ATM_Click(object sender, EventArgs e)
-        {
-            ATM atmPage = new ATM();
-            atmPage.CurrentUser = this.CurrentUser;
-            atmPage.ShowDialog();
-        }
-
         private void btn_CurrencyBuySell_Click(object sender, EventArgs e)
         {
             var currencyForm = new CurrencyBuySell
             {
-                CurrentUser = this.CurrentUser  
+                CurrentUser = this.CurrentUser
             };
 
-            currencyForm.ShowDialog();  
+            currencyForm.ShowDialog();
         }
+
+        private void btn_ApplyLoan_Click(object sender, EventArgs e)
+        {
+            InsertLoanPage form = new InsertLoanPage();
+            form.CurrentUser = this.CurrentUser;
+            form.ShowDialog();
+
+            LoadLoans();
+        }
+
         #endregion
 
         #region Exports
@@ -575,7 +618,6 @@ namespace BankamatikFormApp
         }
         #endregion
 
-
         #region ThemeChange
         private enum GridTheme
         {
@@ -801,13 +843,84 @@ namespace BankamatikFormApp
 
         #endregion
 
+        private void cmbLoanFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadLoans();
+        }
 
+        private void HandleTransaction(bool isDeposit, List<int> userAccountIds)
+        {
+            if (comboBoxAccountID.SelectedItem == null || !int.TryParse(comboBoxAccountID.SelectedItem.ToString(), out int accountId))
+            {
+                MessageBox.Show("Please select a valid Account ID.");
+                return;
+            }
 
+            if (!decimal.TryParse(txtAmount.Text.Trim(), out decimal amount) || amount <= 0)
+            {
+                MessageBox.Show("Invalid Amount.");
+                return;
+            }
 
+            if (CurrentUser.Role != "Admin" && !userAccountIds.Contains(accountId))
+            {
+                MessageBox.Show("You can only transact on your own accounts.");
+                return;
+            }
 
+            decimal finalAmount = isDeposit ? amount : -amount;
 
+            try
+            {
+                var transaction = new Transaction
+                {
+                    FromAccountID = accountId,
+                    ToAccountID = accountId,
+                    Amount = finalAmount,
+                    TransactionDate = DateTime.Now
+                };
 
-       
+                transactionService.CreateTransaction(transaction);
 
+                logService.InsertLog(CurrentUser.ID, isDeposit ? "Deposit" : "Withdraw", $"{accountId} hesabına işlem: {(isDeposit ? "+" : "-")}{amount}");
+
+                MessageBox.Show(isDeposit ? "Deposit succeed." : "Withdraw succeed.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+        }
+
+        private void btn_Deposit_Click(object sender, EventArgs e)
+        {
+            if (CurrentUser.Role == "Admin")
+            {
+                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
+            }
+            else
+            {
+                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
+            }
+        }
+
+        private void btn_Withdraw_Click(object sender, EventArgs e)
+        {
+            if (CurrentUser.Role == "Admin")
+            {
+                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
+            }
+            else
+            {
+                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
+            }
+        }
+
+        private void btn_PayLoan_Click(object sender, EventArgs e)
+        {
+            PayLoanPage payLoanPage = new PayLoanPage();
+            payLoanPage.CurrentUser = this.CurrentUser; // Giriş yapan kullanıcıyı aktar
+            payLoanPage.ShowDialog(); // Pop-up gibi açmak için ShowDialog kullan
+        }
     }
 }

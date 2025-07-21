@@ -14,7 +14,6 @@ namespace Bankamatik.DataAccess.Repositories
         {
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
-
         public List<Loan> GetLoans(Loan loan)
         {
             var loans = new List<Loan>();
@@ -24,9 +23,9 @@ namespace Bankamatik.DataAccess.Repositories
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@LoanID", (object?)loan.LoanID ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@UserID", (object?)loan.UserID ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Status", (object?)loan.Status ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@LoanID", loan.LoanID);
+                cmd.Parameters.AddWithValue("@UserID", loan.UserID);
+                cmd.Parameters.AddWithValue("@Status", loan.Status);
 
                 conn.Open();
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -51,7 +50,7 @@ namespace Bankamatik.DataAccess.Repositories
             return loans;
         }
 
-        public bool InsertLoan(Loan loan)
+        public void InsertLoan(Loan loan)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand("sp_InsertLoan", conn))
@@ -66,11 +65,11 @@ namespace Bankamatik.DataAccess.Repositories
                 cmd.Parameters.AddWithValue("@Status", loan.Status);
 
                 conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
+                cmd.ExecuteNonQuery();
             }
         }
 
-        public bool UpdateLoan(Loan loan)
+        public void UpdateLoan(Loan loan)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand("sp_UpdateLoan", conn))
@@ -78,6 +77,7 @@ namespace Bankamatik.DataAccess.Repositories
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@LoanID", loan.LoanID);
+                cmd.Parameters.AddWithValue("@UserID", loan.UserID);
                 cmd.Parameters.AddWithValue("@Amount", loan.Amount);
                 cmd.Parameters.AddWithValue("@InterestRate", loan.InterestRate);
                 cmd.Parameters.AddWithValue("@StartDate", loan.StartDate);
@@ -85,39 +85,21 @@ namespace Bankamatik.DataAccess.Repositories
                 cmd.Parameters.AddWithValue("@Status", loan.Status);
 
                 conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
+                cmd.ExecuteNonQuery();
             }
         }
 
-        public bool DeleteLoan(int loanId)
+        public void DeleteLoan(Loan loan)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand("sp_DeleteLoan", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@LoanID", loanId);
+                cmd.Parameters.AddWithValue("@LoanID", loan.LoanID);
 
                 conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
+                cmd.ExecuteNonQuery();
             }
         }
-
-
-
-        public bool UpdateLoanStatus(int loanId, string status)
-        {
-            using (SqlConnection conn = new SqlConnection(_connectionString))
-            using (SqlCommand cmd = new SqlCommand("sp_UpdateLoanStatus", conn))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@LoanID", loanId);
-                cmd.Parameters.AddWithValue("@Status", status);
-
-                conn.Open();
-                int affectedRows = cmd.ExecuteNonQuery();
-                return affectedRows > 0;
-            }
-        }
-
     }
 }

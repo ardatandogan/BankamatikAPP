@@ -27,7 +27,7 @@ namespace Bankamatik.DataAccess.Repositories
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@UserID", (object?)account.UserID ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@UserID", account.UserID);
                 cmd.Parameters.AddWithValue("@BalanceMin", DBNull.Value);
                 cmd.Parameters.AddWithValue("@BalanceMax", DBNull.Value);
 

@@ -35,9 +35,10 @@
             // 
             // btn_DeleteAccount
             // 
-            btn_DeleteAccount.Location = new Point(144, 128);
+            btn_DeleteAccount.Location = new Point(126, 96);
+            btn_DeleteAccount.Margin = new Padding(3, 2, 3, 2);
             btn_DeleteAccount.Name = "btn_DeleteAccount";
-            btn_DeleteAccount.Size = new Size(119, 29);
+            btn_DeleteAccount.Size = new Size(104, 22);
             btn_DeleteAccount.TabIndex = 0;
             btn_DeleteAccount.Text = "Delete Account";
             btn_DeleteAccount.UseVisualStyleBackColor = true;
@@ -45,29 +46,32 @@
             // 
             // txtAccountID
             // 
-            txtAccountID.Location = new Point(123, 82);
+            txtAccountID.Location = new Point(108, 62);
+            txtAccountID.Margin = new Padding(3, 2, 3, 2);
             txtAccountID.Name = "txtAccountID";
-            txtAccountID.Size = new Size(166, 27);
+            txtAccountID.Size = new Size(146, 23);
             txtAccountID.TabIndex = 1;
             // 
             // lbl_AccountID
             // 
             lbl_AccountID.AutoSize = true;
-            lbl_AccountID.Location = new Point(39, 85);
+            lbl_AccountID.Location = new Point(34, 64);
             lbl_AccountID.Name = "lbl_AccountID";
-            lbl_AccountID.Size = new Size(78, 20);
+            lbl_AccountID.Size = new Size(63, 15);
             lbl_AccountID.TabIndex = 2;
             lbl_AccountID.Text = "AccountID";
             // 
             // DeleteAccount
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(392, 291);
+            ClientSize = new Size(343, 218);
             Controls.Add(lbl_AccountID);
             Controls.Add(txtAccountID);
             Controls.Add(btn_DeleteAccount);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "DeleteAccount";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "DeleteAccount";
             Load += DeleteAccount_Load;
             ResumeLayout(false);

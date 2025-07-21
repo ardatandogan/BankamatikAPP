@@ -52,7 +52,7 @@ namespace BankamatikFormApp
 
                 // Log ekle
                 var createdUser = userService.GetUserByUsername(new User { Username = newUser.Username });
-                logService.InsertLog(createdUser?.ID, "Create", $"User created: Username={username}");
+                logService.InsertLog(createdUser?.ID, "Create", description: $"User created: Username={username}");
             }
             catch (Exception ex)
             {
