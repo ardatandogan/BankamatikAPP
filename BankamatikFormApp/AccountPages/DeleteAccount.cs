@@ -17,8 +17,12 @@ namespace BankamatikFormApp
         public DeleteAccount()
         {
             InitializeComponent();
-            accountService = new AccountService(new AccountRepository());
-            transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
+            accountService = new AccountService(new Bankamatik.DataAccess.Repositories.AccountRepository(), logService);
+            transactionService = new TransactionService(
+    new TransactionRepository(),
+    new AccountRepository(),
+    new LogService(new LogRepository())
+);
         }
 
         private void btn_DeleteAccount_Click(object sender, EventArgs e)
@@ -34,11 +38,7 @@ namespace BankamatikFormApp
                         MessageBox.Show("Account and related transactions deleted successfully.");
 
                         // Log ekle
-                        logService.InsertLog(
-                            CurrentUser?.ID,
-                            "Delete",
-                            $"Account deleted. AccountID={accountId}"
-                        );
+                       
                     }
                     else
                     {

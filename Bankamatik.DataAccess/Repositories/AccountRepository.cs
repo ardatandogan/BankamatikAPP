@@ -15,10 +15,8 @@ namespace Bankamatik.DataAccess.Repositories
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
 
-        // ...
-
-        // GET LIST 
-        public List<Account> GetAccounts(Account account)
+        // GET LIST
+        public List<Account> GetAccounts(Account? account) // account parametresini nullable yaptım
         {
             var accounts = new List<Account>();
 
@@ -27,8 +25,13 @@ namespace Bankamatik.DataAccess.Repositories
             {
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@AccountID", account.AccountID);
-                cmd.Parameters.AddWithValue("@UserID", account.UserID);
+                // **DÜZELTME BAŞLANGICI**
+                // account.AccountID veya account.UserID null ise DBNull.Value gönderiyoruz.
+                // Eğer account null ise, tüm ID'leri DBNull.Value gönderiyoruz.
+                cmd.Parameters.AddWithValue("@AccountID", account?.AccountID ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@UserID", account?.UserID ?? (object)DBNull.Value);
+                // **DÜZELTME BİTİŞİ**
+
                 cmd.Parameters.AddWithValue("@BalanceMin", DBNull.Value);
                 cmd.Parameters.AddWithValue("@BalanceMax", DBNull.Value);
 
@@ -40,7 +43,8 @@ namespace Bankamatik.DataAccess.Repositories
                         accounts.Add(new Account
                         {
                             AccountID = reader.GetInt32(reader.GetOrdinal("AccountID")),
-                            UserID = reader.GetInt32(reader.GetOrdinal("UserID")),
+                            // UserID'yi okurken nullable olabileceğini göz önünde bulundur
+                            UserID = reader.IsDBNull(reader.GetOrdinal("UserID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UserID")),
                             Balance = reader.GetDecimal(reader.GetOrdinal("Balance")),
                             ParaCinsi = reader.GetString(reader.GetOrdinal("ParaCinsi")),
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
@@ -52,7 +56,7 @@ namespace Bankamatik.DataAccess.Repositories
             return accounts;
         }
 
-        // GET BY ID 
+        // GET BY ID - Bu metot zaten doğru bir şekilde DBNull.Value kullanıyor
         public Account? GetAccountById(Account account)
         {
             Account? result = null;
@@ -64,7 +68,10 @@ namespace Bankamatik.DataAccess.Repositories
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@AccountID", account.AccountID);
-                    cmd.Parameters.AddWithValue("@UserID", account.UserID);
+                    if (account.UserID.HasValue)
+                        cmd.Parameters.AddWithValue("@UserID", account.UserID.Value);
+                    else
+                        cmd.Parameters.AddWithValue("@UserID", DBNull.Value);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -73,7 +80,7 @@ namespace Bankamatik.DataAccess.Repositories
                             result = new Account
                             {
                                 AccountID = reader.GetInt32(reader.GetOrdinal("AccountID")),
-                                UserID = reader.GetInt32(reader.GetOrdinal("UserID")),
+                                UserID = reader.IsDBNull(reader.GetOrdinal("UserID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UserID")),
                                 Balance = reader.GetDecimal(reader.GetOrdinal("Balance")),
                                 ParaCinsi = reader.GetString(reader.GetOrdinal("ParaCinsi")),
                                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
@@ -85,7 +92,7 @@ namespace Bankamatik.DataAccess.Repositories
             return result;
         }
 
-        // INSERT 
+        // INSERT
         public void InsertAccount(Account account)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -95,7 +102,8 @@ namespace Bankamatik.DataAccess.Repositories
                 string sql = "EXEC sp_InsertAccount @UserID, @Balance, @ParaCinsi, @Created";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserID", account.UserID);
+                    // UserID'yi nullable kontrolü ile ekle
+                    cmd.Parameters.AddWithValue("@UserID", account.UserID ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Balance", account.Balance);
                     cmd.Parameters.AddWithValue("@ParaCinsi", account.ParaCinsi ?? (object)DBNull.Value);
 
@@ -109,7 +117,7 @@ namespace Bankamatik.DataAccess.Repositories
             }
         }
 
-        // UPDATE 
+        // UPDATE
         public void UpdateAccount(Account account)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -129,6 +137,7 @@ namespace Bankamatik.DataAccess.Repositories
                 }
             }
         }
+
         public int DeleteAccount(Account account)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -150,7 +159,5 @@ namespace Bankamatik.DataAccess.Repositories
             connection.Open();
             command.ExecuteNonQuery();
         }
-
-        
     }
 }

@@ -8,9 +8,13 @@ namespace BankamatikFormApp
 {
     public partial class DeleteTransaction : Form
     {
-        private readonly TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
         private readonly LogService logService = new LogService(new LogRepository());
 
+        private readonly TransactionService transactionService = new TransactionService(
+            new TransactionRepository(),
+            new AccountRepository(),
+            new LogService(new LogRepository())
+        );
         // Giriş yapan kullanıcıyı buraya set etmen gerekebilir
         public User? CurrentUser { get; set; }
 
@@ -34,11 +38,7 @@ namespace BankamatikFormApp
                 transactionService.DeleteTransaction(new Transaction { TransactionID = transactionID });
 
                 // Log ekle
-                logService.InsertLog(
-                    CurrentUser?.ID,  // null olabilir, bu yüzden null-checkli
-                    "Delete",
-                    $"Transaction deleted. TransactionID={transactionID}"
-                );
+                
 
                 MessageBox.Show("Transaction deleted successfully.");
                 this.Close();

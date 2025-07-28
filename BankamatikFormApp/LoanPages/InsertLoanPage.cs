@@ -12,8 +12,18 @@ namespace BankamatikFormApp
     {
         public User CurrentUser { get; set; }
 
-        private readonly AccountService accountService = new AccountService(new AccountRepository());
-        private readonly LoanService loanService = new LoanService(new LoanRepository());
+        // Burada AccountRepository ve LogRepository nesnelerini oluşturup geçiyoruz
+        private readonly AccountService accountService = new AccountService(
+            new AccountRepository(),
+            new LogService(new LogRepository())
+        );
+
+        // LoanService de LoanRepository, AccountRepository ve LogService alıyor
+        private readonly LoanService loanService = new LoanService(
+            new LoanRepository(),
+            new AccountRepository(),
+            new LogService(new LogRepository())
+        );
 
         public InsertLoanPage()
         {
@@ -25,8 +35,9 @@ namespace BankamatikFormApp
             LoadAccounts();
             LoadInterestRateOffers();
 
-            cmbAccounts.DisplayMember = "AccountDisplay";
+            cmbAccounts.DisplayMember = "AccountDisplay";  // Eğer Account entity'sinde böyle bir property yoksa, burada değiştirmelisin
             cmbAccounts.ValueMember = "AccountID";
+
             dtpStartDate.Value = DateTime.Today;
             dtpEndDate.Value = DateTime.Today.AddMonths(6);
         }
@@ -41,7 +52,8 @@ namespace BankamatikFormApp
             {
                 cmbAccounts.DataSource = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
             }
-            cmbAccounts.DisplayMember = "AccountDisplay";
+
+            cmbAccounts.DisplayMember = "AccountDisplay"; // Bu property varsa sorun yok, yoksa ToString override vs. yapmalısın
             cmbAccounts.ValueMember = "AccountID";
         }
 
@@ -52,14 +64,12 @@ namespace BankamatikFormApp
 
             List<decimal> offers;
 
-            if (totalBalance > 100000)
-                offers = new List<decimal> { 0.15m };
-
             if (totalBalance > 1000000)
                 offers = new List<decimal> { 0.10m };
-
+            else if (totalBalance > 100000)
+                offers = new List<decimal> { 0.15m };
             else
-                offers = new List<decimal> { 0.2m };
+                offers = new List<decimal> { 0.20m };
 
             cmbInterestRateOffers.DataSource = offers;
         }
@@ -99,6 +109,7 @@ namespace BankamatikFormApp
                 };
 
                 loanService.InsertLoan(loan);
+
                 MessageBox.Show("Loan application submitted.");
             }
             catch (Exception ex)
@@ -106,6 +117,5 @@ namespace BankamatikFormApp
                 MessageBox.Show($"Something went wrong: {ex.Message}");
             }
         }
-
     }
 }

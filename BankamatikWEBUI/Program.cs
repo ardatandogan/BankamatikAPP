@@ -1,7 +1,21 @@
-var builder = WebApplication.CreateBuilder(args);
+using Bankamatik.Business.Services;
+using Bankamatik.DataAccess.Repositories;
 
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<KurService>();
+builder.Services.AddScoped<LogService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<TransactionRepository>();
+builder.Services.AddScoped<AccountRepository>();
+builder.Services.AddScoped<LogRepository>();
+
+
+
+
 
 // ** Session servisini ekle **
 builder.Services.AddSession(options =>
@@ -29,6 +43,7 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

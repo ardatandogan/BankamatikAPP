@@ -1,0 +1,74 @@
+﻿@model BankamatikWebApp.Models.CurrencyBuySellViewModel
+
+@{
+    ViewData["Title"] = "Döviz Takas İşlemi";
+}
+
+<h1>Döviz Takas İşlemi</h1>
+
+<hr />
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")" role="alert">
+        @Model.Message
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Buy" method="post">
+            @* Tek bir "Buy" metodu ile takas işlemini yapacağız *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="CurrentUserID" />
+
+            <div class="form-group">
+                <label asp-for="SelectedFromAccountId" class="control-label"></label>
+                <select asp-for="SelectedFromAccountId" class="form-control" asp-items="Model.FromAccounts">
+                    <option value="">Lütfen Gönderen Hesabı Seçiniz</option>
+                </select>
+                <span asp-validation-for="SelectedFromAccountId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedToAccountId" class="control-label"></label>
+                <select asp-for="SelectedToAccountId" class="form-control" asp-items="Model.ToAccounts">
+                    <option value="">Lütfen Alıcı Hesabı Seçiniz</option>
+                </select>
+                <span asp-validation-for="SelectedToAccountId" class="text-danger"></span>
+            </div>
+
+            @* SelectedCurrencyCode alanı kaldırıldı *@
+            @*
+            <div class="form-group">
+                <label asp-for="SelectedCurrencyCode" class="control-label"></label>
+                <select asp-for="SelectedCurrencyCode" class="form-control" asp-items="Model.Currencies">
+                    <option value="">Lütfen Döviz Cinsi Seçiniz</option>
+                </select>
+                <span asp-validation-for="SelectedCurrencyCode" class="text-danger"></span>
+            </div>
+            *@
+
+            <div class="form-group">
+                <label asp-for="Amount" class="control-label"></label>
+                <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Takas Yap" class="btn btn-primary" /> @* Buton metni "Takas Yap" olarak değiştirildi *@
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Döviz Kurları Sayfasına Geri Dön</a> @* Eğer CurrencyController'daki Index'i sildiyseniz bu linki de kaldırın *@
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -20,26 +20,12 @@ namespace Bankamatik.Business.Services
             return _logRepository.GetLogsByFilters(log);
         }
 
-        
+
 
         // Yeni log kaydı ekler
-        public void InsertLog(int? userId, string actionType, string description)
+        public void InsertLog(Log log)
         {
-            if (string.IsNullOrWhiteSpace(actionType))
-                throw new ArgumentException("ActionType cannot be null or empty.", nameof(actionType));
-
-            if (string.IsNullOrWhiteSpace(description))
-                throw new ArgumentException("Description cannot be null or empty.", nameof(description));
-
-            var log = new Log
-            {
-                UserID = userId,
-                ActionType = actionType.Trim(),
-                Description = description.Trim(),
-                CreatedAt = DateTime.Now
-            };
-
-            _logRepository.InsertLog(log);
+            _logRepository.InsertLog(log); // sadece log entity'si alıyor
         }
     }
 }

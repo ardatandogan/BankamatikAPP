@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Pay Loan";
+    var loans = ViewBag.Loans as List<Bankamatik.Core.Entities.Loan> ?? new List<Bankamatik.Core.Entities.Loan>();
+    var accounts = ViewBag.Accounts as List<Bankamatik.Core.Entities.Account> ?? new List<Bankamatik.Core.Entities.Account>();
+}
+
+<h2>Pay Loan</h2>
+
+<form asp-action="PayLoan" method="post" class="needs-validation" novalidate>
+    <div class="mb-3">
+        <label for="loanId" class="form-label">Select Loan</label>
+        <select id="loanId" name="loanId" class="form-select" required>
+            <option value="">Choose a loan</option>
+            @foreach (var loan in loans)
+            {
+                <option value="@loan.LoanID">@($"Loan {loan.LoanID} - {loan.Amount:C} - {loan.Status}")</option>
+            }
+        </select>
+        <div class="invalid-feedback">Please select a loan.</div>
+    </div>
+
+    <div class="mb-3">
+        <label for="accountId" class="form-label">Select Account to Pay From</label>
+        <select id="accountId" name="accountId" class="form-select" required>
+            <option value="">Choose an account</option>
+            @foreach (var acc in accounts)
+            {
+                <option value="@acc.AccountID">@($"{acc.AccountDisplay} - Balance: {acc.Balance:C}")</option>
+            }
+        </select>
+        <div class="invalid-feedback">Please select an account.</div>
+    </div>
+
+    <!-- Payment amount textbox kaldırıldı -->
+
+    <button type="submit" class="btn btn-primary">Pay Full Amount</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <script>
+        // Bootstrap 5 validation
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}

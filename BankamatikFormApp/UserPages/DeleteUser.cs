@@ -8,12 +8,15 @@ namespace BankamatikFormApp
 {
     public partial class DeleteUser : Form
     {
-        private readonly UserService userService = new UserService(new UserRepository());
-        private readonly LogService logService = new LogService(new LogRepository());
+        private readonly LogService logService;
+        private readonly UserService userService;
 
         public DeleteUser()
         {
             InitializeComponent();
+
+            logService = new LogService(new LogRepository());
+            userService = new UserService(new UserRepository(), logService);
         }
 
         private void btn_DeleteUser_Click(object sender, EventArgs e)
@@ -30,9 +33,6 @@ namespace BankamatikFormApp
             {
                 var userToDelete = new User { ID = userId };
                 userService.DeleteUser(userToDelete);
-
-                // Log ekle
-                logService.InsertLog(userId, "Delete", $"User deleted with ID={userId}");
 
                 MessageBox.Show("User deleted successfully.");
                 this.Close();

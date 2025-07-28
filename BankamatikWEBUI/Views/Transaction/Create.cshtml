@@ -1,0 +1,74 @@
+﻿@model Bankamatik.Core.Entities.Transaction
+
+@{
+    ViewBag.Title = "Create Transaction";
+}
+
+<h2>Create Transaction</h2>
+
+<form asp-action="Create" method="post"
+      onsubmit="if (!validateCurrencyMatch()) return false; this.querySelector('button[type=submit]').disabled = true;">
+    <div>
+        <label>From Account</label>
+        <select id="FromAccountID" name="FromAccountID" class="form-control" onchange="updateFromCurrency()">
+            <option value="">Select</option>
+            @foreach (var account in ViewBag.FromAccounts)
+            {
+                <option value="@account.AccountID">@account.Display</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label>To Account</label>
+        <select id="ToAccountID" name="ToAccountID" class="form-control" onchange="updateToCurrency()">
+            <option value="">Select</option>
+            @foreach (var account in ViewBag.ToAccounts)
+            {
+                <option value="@account.AccountID">@account.Display</option>
+            }
+        </select>
+    </div>
+
+    <input type="hidden" id="FromCurrency" />
+    <input type="hidden" id="ToCurrency" />
+
+    <div>
+        <label>Amount</label>
+        <input asp-for="Amount" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@section Scripts {
+    <script>
+        function updateFromCurrency() {
+            var selected = document.getElementById("FromAccountID").selectedOptions[0]?.text || "";
+            var currency = selected.split('-')[1]?.trim() || "";
+            document.getElementById("FromCurrency").value = currency;
+        }
+
+        function updateToCurrency() {
+            var selected = document.getElementById("ToAccountID").selectedOptions[0]?.text || "";
+            var currency = selected.split('-')[1]?.trim() || "";
+            document.getElementById("ToCurrency").value = currency;
+        }
+
+        function validateCurrencyMatch() {
+            const from = document.getElementById("FromCurrency").value;
+            const to = document.getElementById("ToCurrency").value;
+
+            if (from === "" || to === "") {
+                alert("Please select both From and To accounts.");
+                return false;
+            }
+
+            if (from !== to) {
+                alert("From ve To hesaplarının para birimi aynı olmalı!");
+                return false;
+            }
+            return true;
+        }
+    </script>
+}

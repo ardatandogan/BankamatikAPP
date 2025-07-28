@@ -1,9 +1,6 @@
 ﻿using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using Microsoft.Identity.Client;
 
 namespace BankamatikWEBUI.Controllers
 {
@@ -13,7 +10,8 @@ namespace BankamatikWEBUI.Controllers
 
         public AccountController()
         {
-            _accountService = new AccountService(new Bankamatik.DataAccess.Repositories.AccountRepository());
+            var logService = new LogService(new Bankamatik.DataAccess.Repositories.LogRepository());
+            _accountService = new AccountService(new Bankamatik.DataAccess.Repositories.AccountRepository(), logService);
         }
 
         // Hesapları listele (admin ise tüm hesaplar, user ise kendi hesapları)

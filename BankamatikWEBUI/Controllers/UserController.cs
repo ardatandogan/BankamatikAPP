@@ -12,7 +12,11 @@ namespace BankamatikWEBUI.Controllers
 
         public UserController()
         {
-            _userService = new UserService(new UserRepository());
+            var userRepository = new UserRepository();
+            var logRepository = new LogRepository();
+            var logService = new LogService(logRepository);
+
+            _userService = new UserService(userRepository, logService);
         }
 
         // Oturum kontrolü için yardımcı method
@@ -33,21 +37,35 @@ namespace BankamatikWEBUI.Controllers
             var redirect = CheckSession();
             if (redirect != null) return redirect;
 
+            var role = HttpContext.Session.GetString("role") ?? "";
+            var username = HttpContext.Session.GetString("username") ?? "";
+
             List<User> users;
 
-            if (!string.IsNullOrEmpty(search))
+            if (role.ToLower() == "admin")
             {
-                // Username ile eşleşen kullanıcıyı getir
-                var foundUser = _userService.GetUserByUsername(new User { Username = search });
-                users = foundUser != null ? new List<User> { foundUser } : new List<User>();
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var foundUser = _userService.GetUserByUsername(new User { Username = search });
+                    users = foundUser != null ? new List<User> { foundUser } : new List<User>();
+                }
+                else
+                {
+                    users = _userService.GetAllUsers();
+                }
             }
             else
             {
-                users = _userService.GetAllUsers();
+                // admin değilse sadece kendi kullanıcı bilgisi
+                var currentUser = _userService.GetUserByUsername(new User { Username = username });
+                users = currentUser != null ? new List<User> { currentUser } : new List<User>();
             }
+
+            ViewBag.UserRole = role; // view için rolü gönder
 
             return View(users);
         }
+
 
         #endregion
 

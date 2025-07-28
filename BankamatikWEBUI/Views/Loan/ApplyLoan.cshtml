@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Apply Loan";
+    var interestOffers = ViewBag.InterestOffers as List<decimal> ?? new List<decimal>();
+
+    // Post sonrası değerleri al, yoksa varsayılan atama yap
+    string amountValue = "";
+    string interestRateValue = "";
+    string startDateValue = DateTime.Today.ToString("yyyy-MM-dd");
+    string endDateValue = DateTime.Today.AddMonths(6).ToString("yyyy-MM-dd");
+
+    if (Context.Request.Method == "POST")
+    {
+        amountValue = Context.Request.Form["amount"];
+        interestRateValue = Context.Request.Form["interestRate"];
+        startDateValue = Context.Request.Form["startDate"];
+        endDateValue = Context.Request.Form["endDate"];
+    }
+}
+
+<h2>Apply for a Loan</h2>
+
+<form asp-action="ApplyLoan" method="post" class="needs-validation" novalidate>
+    <div class="mb-3">
+        <label for="amount" class="form-label">Amount</label>
+        <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="amount" value="@amountValue" required />
+        <div class="invalid-feedback">Please enter a valid amount greater than zero.</div>
+        @Html.ValidationMessage("amount", null, new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="interestRate" class="form-label">Interest Rate</label>
+        <select class="form-select" id="interestRate" name="interestRate" required>
+            <option value="">Select interest rate</option>
+            @foreach (var rate in interestOffers)
+            {
+                if (interestRateValue == rate.ToString())
+                {
+                    <option value="@rate" selected>@(rate * 100)%</option>
+                }
+                else
+                {
+                    <option value="@rate">@(rate * 100)%</option>
+                }
+            }
+        </select>
+        <div class="invalid-feedback">Please select an interest rate.</div>
+        @Html.ValidationMessage("interestRate", null, new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input type="date" class="form-control" id="startDate" name="startDate" value="@startDateValue" required />
+        <div class="invalid-feedback">Please select a start date.</div>
+        @Html.ValidationMessage("startDate", null, new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="endDate" class="form-label">End Date</label>
+        <input type="date" class="form-control" id="endDate" name="endDate" value="@endDateValue" required />
+        <div class="invalid-feedback">Please select an end date.</div>
+        @Html.ValidationMessage("endDate", null, new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <script>
+        // Bootstrap 5 form validation
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}

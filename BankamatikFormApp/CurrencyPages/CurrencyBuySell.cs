@@ -12,12 +12,9 @@ namespace BankamatikFormApp
     {
         public User CurrentUser { get; set; }
 
-        private readonly AccountService accountService = new AccountService(new AccountRepository());
-        private readonly KurService kurService = new KurService();
+        private readonly AccountService accountService;
         private readonly LogService logService = new LogService(new LogRepository());
-
-
-
+        private readonly KurService kurService = new KurService();
 
         public CurrencyBuySell()
         {
@@ -123,7 +120,6 @@ namespace BankamatikFormApp
             bankCurrencyAccount.Balance -= amount;
             accountService.UpdateAccount(bankCurrencyAccount);
 
-            logService.InsertLog(CurrentUser.ID, "CurrencyBuy", $"Bought {amount} {currency.Kod} from AccountID {fromAccount.AccountID} to AccountID {toAccount.AccountID}");
             MessageBox.Show($"You bought {amount} {currency.Kod} for {totalCost} TRY.");
         }
 
@@ -193,7 +189,6 @@ namespace BankamatikFormApp
             accountService.UpdateAccount(bankCurrencyAccount);
             accountService.UpdateAccount(bankTryAccount);
 
-            logService.InsertLog(CurrentUser.ID, "CurrencySell", $"Sold {amount} {currency.Kod} from AccountID {fromAccount.AccountID} to AccountID {toAccount.AccountID}");
             MessageBox.Show($"You sold {amount} {currency.Kod} and received {totalReturn} TRY.");
         }
 

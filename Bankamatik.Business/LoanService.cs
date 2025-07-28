@@ -12,22 +12,7 @@ namespace Bankamatik.Business.Services
         private readonly AccountRepository _accountRepository;
         private readonly LogService _logService;
 
-        // 1. Geri uyumlu constructor (sadece LoanRepository)
-        public LoanService(LoanRepository loanRepository)
-        {
-            _loanRepository = loanRepository;
-            _logService = new LogService(new LogRepository()); // Default log servisi
-        }
-
-        // 2. LogService ile kullanım
-        public LoanService(LoanRepository loanRepository, LogService logService, AccountRepository accountRepository)
-        {
-            _loanRepository = loanRepository;
-            _logService = logService;
-            _accountRepository = accountRepository;
-        }
-
-        // 3. AccountRepository + LogService ile kullanım
+        // Constructor: LoanRepository, AccountRepository ve LogService'i zorunlu alıyor
         public LoanService(LoanRepository loanRepository, AccountRepository accountRepository, LogService logService)
         {
             _loanRepository = loanRepository;
@@ -38,22 +23,40 @@ namespace Bankamatik.Business.Services
         public void InsertLoan(Loan loan)
         {
             _loanRepository.InsertLoan(loan);
-            _logService?.InsertLog(loan.UserID, "InsertLoan",
-                $"Loan inserted: Amount={loan.Amount}, InterestRate={loan.InterestRate}%, StartDate={loan.StartDate:yyyy-MM-dd}");
+
+            _logService.InsertLog(new Log
+            {
+                UserID = loan.UserID,
+                ActionType = "Insert",
+                Description = $"Loan application created: Amount {loan.Amount}, Start {loan.StartDate.ToShortDateString()}, End {loan.EndDate.ToShortDateString()}",
+                CreatedAt = DateTime.Now
+            });
         }
 
         public void UpdateLoan(Loan loan)
         {
             _loanRepository.UpdateLoan(loan);
-            _logService?.InsertLog(loan.UserID, "UpdateLoan",
-                $"Loan updated: LoanID={loan.LoanID}, NewAmount={loan.Amount}, Status={loan.Status}");
+
+            _logService.InsertLog(new Log
+            {
+                UserID = loan.UserID,
+                ActionType = "Update",
+                Description = $"Loan updated: LoanID {loan.LoanID}, Status {loan.Status}",
+                CreatedAt = DateTime.Now
+            });
         }
 
         public void DeleteLoan(Loan loan)
         {
             _loanRepository.DeleteLoan(loan);
-            _logService?.InsertLog(loan.UserID, "DeleteLoan",
-                $"Loan deleted: LoanID={loan.LoanID}");
+
+            _logService.InsertLog(new Log
+            {
+                UserID = loan.UserID,
+                ActionType = "Delete",
+                Description = $"Loan deleted: LoanID {loan.LoanID}",
+                CreatedAt = DateTime.Now
+            });
         }
 
         public List<Loan> GetLoans(Loan loan)

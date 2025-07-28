@@ -11,7 +11,7 @@ namespace BankamatikFormApp
         public Account CurrentAccount { get; set; }
         public int? CurrentUserID { get; set; }  // Kullanıcı ID'si için property eklendi
 
-        private readonly AccountService accountService = new AccountService(new AccountRepository());
+        private readonly AccountService accountService;
         private readonly LogService logService = new LogService(new LogRepository());
 
         public UpdateBalancePage()
@@ -41,7 +41,6 @@ namespace BankamatikFormApp
                     accountService.UpdateAccount(CurrentAccount);
 
                     // Log kaydı eklendi
-                    logService.InsertLog(CurrentUserID, "UpdateBalance", $"AccountID {CurrentAccount.AccountID} balance updated to {newBalance}");
 
                     MessageBox.Show("Balance updated successfully.");
                 }

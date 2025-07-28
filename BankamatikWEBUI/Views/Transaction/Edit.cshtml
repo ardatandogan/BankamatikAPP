@@ -1,0 +1,24 @@
+﻿@model Bankamatik.Core.Entities.Transaction
+@{
+    ViewData["Title"] = "Edit Transaction";
+}
+
+<h2>Edit Transaction</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="TransactionID" />
+    <div class="form-group">
+        <label asp-for="FromAccountID"></label>
+        <input asp-for="FromAccountID" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ToAccountID"></label>
+        <input asp-for="ToAccountID" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Amount"></label>
+        <input asp-for="Amount" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

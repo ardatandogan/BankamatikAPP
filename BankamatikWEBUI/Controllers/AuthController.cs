@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Bankamatik.Business.Services;
+﻿using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
+using Bankamatik.DataAccess.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bankamatik.WebUI.Controllers
 {
@@ -9,10 +10,16 @@ namespace Bankamatik.WebUI.Controllers
     {
         private readonly UserService _userService;
         private readonly AccountService _accountService;
+        private readonly LogService _logService;
 
         public AuthController()
         {
-            _userService = new UserService(new Bankamatik.DataAccess.Repositories.UserRepository());
+            var userRepository = new UserRepository();
+            var logRepository = new LogRepository();
+            var logService = new LogService(logRepository);
+
+            _userService = new UserService(userRepository, logService);
+            _logService = new LogService(new LogRepository());
         }
 
         [HttpGet]
@@ -26,7 +33,6 @@ namespace Bankamatik.WebUI.Controllers
             var userId = HttpContext.Session.GetInt32("userId");
             if (userId == null)
             {
-                // Giriş yapılmamış, login sayfasına yönlendir
                 return RedirectToAction("Login", "Auth");
             }
 
@@ -39,16 +45,18 @@ namespace Bankamatik.WebUI.Controllers
         {
             var user = _userService.GetUserByUsername(new User { Username = username });
 
-            if (user != null && user.PasswordHash == password)  // Gerçek projede hash karşılaştırmalı
+            if (user != null && user.PasswordHash == password)  // Not: Gerçek projede hash karşılaştırmalı
             {
-                // Session'a kullanıcı bilgilerini ekle
                 HttpContext.Session.SetInt32("userId", user.ID);
                 HttpContext.Session.SetString("username", user.Username);
                 HttpContext.Session.SetString("role", user.Role);
 
-                // Giriş başarılı, kullanıcı sayfasına yönlendir
+                // Log: Kullanıcı başarılı giriş yaptı
+
                 return RedirectToAction("Index", "User");
             }
+
+            // Log: Başarısız giriş denemesi (userId null, username ile loglayabiliriz)
 
             ViewBag.Error = "Kullanıcı adı veya şifre yanlış";
             return View();
@@ -56,7 +64,13 @@ namespace Bankamatik.WebUI.Controllers
 
         public IActionResult Logout()
         {
+            var userId = HttpContext.Session.GetInt32("userId");
+            var username = HttpContext.Session.GetString("username");
+
             HttpContext.Session.Clear();
+
+            // Log: Kullanıcı çıkış yaptı
+
             return RedirectToAction("Login");
         }
     }

@@ -11,27 +11,34 @@ using System.Windows.Forms;
 namespace BankamatikFormApp
 {
 
-    //TODO: PAY LOAN YAPILACAK.
-    //TODO: DEBUGGING YAP UYGULAMA CRASH VERMESİN.
-    //TODO: OTOMATİK OLARAK INTEREST RATE VERİLECEK. BAKİYEN ALDIGIN KREDİNİN 10 KATIYSA O ZAMAN MINIMUM INTEREST RATE DEGILSE MAX GİBİ.
-    //TODO: .net extension methods.(BUNA BAK!!!!)
+ 
 
 
     public partial class MainPage : Form
     {
         public User CurrentUser { get; set; }
         private GridTheme userTheme = GridTheme.Ice;
-
-        AccountService accountService = new AccountService(new AccountRepository());
-        UserService userService = new UserService(new UserRepository());
-        TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
-        LogService logService = new LogService(new LogRepository());
-        KurService kurService = new KurService();
-        LoanService loanService = new LoanService(new LoanRepository());
+        private readonly LogService logService = new LogService(new LogRepository());
+        private readonly AccountService accountService;
+        private readonly UserService userService;
+        private readonly TransactionService transactionService;
+        private readonly KurService kurService = new KurService();
+        private readonly LoanService loanService = new LoanService(
+    new LoanRepository(),
+    new AccountRepository(),
+    new LogService(new LogRepository())
+);
 
         public MainPage()
         {
             InitializeComponent();
+            accountService = new AccountService(new AccountRepository(), logService);
+            userService = new UserService(new UserRepository(), logService);
+            transactionService = new TransactionService(
+                new TransactionRepository(),
+                new AccountRepository(),
+                logService
+            );
         }
 
         private void MainPage_Load(object sender, EventArgs e)
@@ -347,7 +354,6 @@ namespace BankamatikFormApp
                 loginForm.Show();
                 this.Close();
                 LogService logService = new LogService(new LogRepository());
-                logService.InsertLog(CurrentUser.ID, "Logout", $"{CurrentUser.Username} has logged out.");
             }
         }
 
@@ -882,7 +888,6 @@ namespace BankamatikFormApp
 
                 transactionService.CreateTransaction(transaction);
 
-                logService.InsertLog(CurrentUser.ID, isDeposit ? "Deposit" : "Withdraw", $"{accountId} hesabına işlem: {(isDeposit ? "+" : "-")}{amount}");
 
                 MessageBox.Show(isDeposit ? "Deposit succeed." : "Withdraw succeed.");
             }

@@ -8,12 +8,13 @@ namespace BankamatikFormApp
 {
     public partial class InsertUserPage : Form
     {
-        private readonly UserService userService = new UserService(new UserRepository());
         private readonly LogService logService = new LogService(new LogRepository());
+        private readonly UserService userService;
 
         public InsertUserPage()
         {
             InitializeComponent();
+            userService = new UserService(new UserRepository(), logService);
         }
 
         private void InsertUserPage_Load(object sender, EventArgs e)
@@ -42,7 +43,7 @@ namespace BankamatikFormApp
             {
                 Username = username,
                 PasswordHash = password,
-                Role = "User" // varsayılan role, eğer kullanıcıdan alınmıyorsa
+                Role = "User" // varsayılan rol
             };
 
             try
@@ -50,9 +51,10 @@ namespace BankamatikFormApp
                 string resultMessage = userService.CreateUser(newUser);
                 MessageBox.Show(resultMessage, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Log ekle
+                // İsteğe bağlı: oluşturulan kullanıcıyı geri al
                 var createdUser = userService.GetUserByUsername(new User { Username = newUser.Username });
-                logService.InsertLog(createdUser?.ID, "Create", description: $"User created: Username={username}");
+
+                // Log kaydı da burada eklenebilir (dilersen ekleyebilirim)
             }
             catch (Exception ex)
             {

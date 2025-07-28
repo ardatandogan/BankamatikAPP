@@ -5,27 +5,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-
 namespace Bankamatik.Business.Services
 {
     public class UserService
     {
         private readonly UserRepository _userRepository;
-        public UserService(UserRepository userRepository)
+        private readonly LogService _logService;
+
+        public UserService(UserRepository userRepository, LogService logService)
         {
             _userRepository = userRepository;
+            _logService = logService;
         }
-       
+
         public List<User> GetAllUsers()
         {
             return _userRepository.GetUsers();
         }
-        //get by username
-        public User? GetUserByUsername(User user)
 
+        public User? GetUserByUsername(User user)
         {
             return _userRepository.GetUser(user);
         }
+
         public string CreateUser(User user)
         {
             if (string.IsNullOrWhiteSpace(user.Username))
@@ -39,6 +41,15 @@ namespace Bankamatik.Business.Services
                 return "This username is already taken.";
 
             _userRepository.InsertUser(user);
+
+            _logService.InsertLog(new Log
+            {
+                UserID = user.ID,
+                ActionType = "Insert",
+                Description = $"User created with username: {user.Username}",
+                CreatedAt = DateTime.Now
+            });
+
             return "success";
         }
 
@@ -48,16 +59,21 @@ namespace Bankamatik.Business.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(user.Username))
-                {
                     throw new Exception("Validation Error: Username cannot be empty.");
-                }
 
                 if (string.IsNullOrWhiteSpace(user.PasswordHash) || user.PasswordHash.Length < 8)
-                {
                     throw new Exception("Validation Error: Password must be at least 8 characters long.");
-                }
 
                 _userRepository.UpdateUser(user);
+
+                _logService.InsertLog(new Log
+                {
+                    UserID = user.ID,
+                    ActionType = "Update",
+                    Description = $"User updated: {user.Username}",
+                    CreatedAt = DateTime.Now
+                });
+
                 sonuc = "Başarılı";
             }
             catch (Exception ex)
@@ -68,22 +84,28 @@ namespace Bankamatik.Business.Services
         }
 
         public User? GetUserById(User user)
-        { 
-                return _userRepository.GetUserById(user);
+        {
+            return _userRepository.GetUserById(user);
         }
+
         public void DeleteUser(User user)
         {
             try
             {
                 _userRepository.DeleteUser(user);
+
+                _logService.InsertLog(new Log
+                {
+                    UserID = user.ID,
+                    ActionType = "Delete",
+                    Description = $"User deleted: {user.Username}",
+                    CreatedAt = DateTime.Now
+                });
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error occurred while deleting user: {ex.Message}", ex);
             }
         }
-
-
-
     }
 }

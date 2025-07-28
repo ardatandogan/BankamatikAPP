@@ -1,0 +1,47 @@
+﻿@model List<Bankamatik.Core.Entities.Kur>
+
+@{
+    ViewBag.Title = "Günlük Döviz Kurları";
+}
+
+<h2>Günlük Döviz Kurları (TCMB)</h2>
+
+
+
+<div class="mb-3">
+    @* Döviz alım/satım sayfasına yönlendiren buton *@
+    <a href="@Url.Action("Trade", "Currency")" class="btn btn-primary">Döviz Al / Sat</a>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning" role="alert">
+        Şu anda görüntülenecek döviz kuru bilgisi bulunmamaktadır. Lütfen daha sonra tekrar deneyin.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Kod</th>
+                <th>İsim</th>
+                <th>Alış</th>
+                <th>Satış</th>
+                <th>Tarih</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kur in Model)
+            {
+                <tr>
+                    <td>@kur.Kod</td>
+                    <td>@kur.Isim</td>
+                    <td>@kur.Alis.ToString("N4") @* Daha hassas gösterim için N4 kullandım *@</td>
+                    <td>@kur.Satis.ToString("N4") @* Daha hassas gösterim için N4 kullandım *@</td>
+                    <td>@kur.Tarih.ToString("dd.MM.yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

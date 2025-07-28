@@ -1,5 +1,9 @@
 ﻿@model List<Bankamatik.Core.Entities.User>
 
+@{
+    var role = ViewBag.UserRole as string;
+}
+
 <h2>Users</h2>
 
 <!-- 🔍 Arama Formu -->
@@ -8,8 +12,11 @@
     <button type="submit" class="btn btn-secondary">Ara</button>
 </form>
 
-<!-- ➕ Yeni Kullanıcı Butonu -->
-<a class="btn btn-primary mb-3" asp-action="Insert">Yeni Kullanıcı Ekle</a>
+<!-- ➕ Yeni Kullanıcı Butonu (Sadece admin için) -->
+@if (role == "admin")
+{
+    <a class="btn btn-primary mb-3" asp-action="Insert">Yeni Kullanıcı Ekle</a>
+}
 
 <!-- 📋 Kullanıcı Tablosu -->
 <table class="table table-striped">
@@ -29,10 +36,6 @@
                 <td>
                     <a class="btn btn-sm btn-warning" asp-action="Update" asp-route-id="@user.ID">Güncelle</a>
                     <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@user.ID">Sil</a>
-             
-                    <a asp-controller="Account" asp-action="Index" asp-route-userId="@user.ID" class="btn btn-sm btn-info">Hesaplar</a>
-              
-
                 </td>
             </tr>
         }

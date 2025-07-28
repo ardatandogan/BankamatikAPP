@@ -1,5 +1,6 @@
 using Bankamatik.Business.Services;
 using Bankamatik.Core.Entities;
+using Bankamatik.DataAccess.Repositories;
 using System;
 using System.Windows.Forms;
 
@@ -25,7 +26,10 @@ namespace BankamatikFormApp
 
             try
             {
-                var userService = new UserService(new Bankamatik.DataAccess.Repositories.UserRepository());
+                var userService = new UserService(
+     new UserRepository(),
+     new LogService(new LogRepository())
+ );
                 User? user = userService.GetUserByUsername(new User { Username = username });
 
                 if (user == null || user.PasswordHash != password)
@@ -35,7 +39,6 @@ namespace BankamatikFormApp
                 }
 
                 var logService = new LogService(new Bankamatik.DataAccess.Repositories.LogRepository());
-                logService.InsertLog(user.ID, "Login", $"{user.Username} logged in.");
                 MessageBox.Show("Login successful.", "Welcome", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 MainPage mainPage = new MainPage

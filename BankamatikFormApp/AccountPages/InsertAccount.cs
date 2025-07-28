@@ -9,8 +9,9 @@ namespace BankamatikFormApp
 {
     public partial class InsertAccount : Form
     {
-        private readonly AccountService accountService = new AccountService(new AccountRepository());
+        private readonly AccountService accountService;
         private readonly LogService logService = new LogService(new LogRepository());
+
 
         public User? CurrentUser { get; set; }
 
@@ -94,7 +95,7 @@ namespace BankamatikFormApp
                 accountService.CreateAccount(newAccount);
 
                 // Log kaydı kaydedilip log tablosuna aktarılacak.
-                logService.InsertLog(userId, "Create", $"New account created for user {userId} with balance {balance} and currency {paraCinsi}");
+              
 
                 MessageBox.Show("Account inserted successfully.");
                 this.Close();

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using Bankamatik.Business.Services;
@@ -11,53 +10,43 @@ namespace BankamatikFormApp
 {
     public partial class InsertTransactionPage : Form
     {
-
         public User? CurrentUser { get; set; }
 
-        private readonly TransactionService transactionService = new TransactionService(new TransactionRepository(), new AccountRepository());
-        private readonly AccountService accountService = new AccountService(new AccountRepository());
         private readonly LogService logService = new LogService(new LogRepository());
+
+        private readonly TransactionService transactionService;
+        private readonly AccountService accountService;
+
         private List<int>? allowedAccountIds = new List<int>();
-
-
 
         public InsertTransactionPage()
         {
             InitializeComponent();
-            // Eğer Validating eventi eklemek istersen buraya ekleyebilirsin:
-            // txtFromAccountID.Validating += TxtFromAccountID_Validating;
+
+            accountService = new AccountService(new AccountRepository(), logService); 
+            transactionService = new TransactionService(new TransactionRepository(), new AccountRepository(), logService);
         }
 
         private void InsertTransactionPage_Load(object sender, EventArgs e)
         {
-            var accountService = new AccountService(new AccountRepository());
-
             if (CurrentUser != null && CurrentUser.Role?.Trim().ToLower() == "user")
             {
                 var userAccounts = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
-
                 allowedAccountIds = userAccounts.Select(a => a.AccountID).ToList();
-
-                // Sadece AccountID listesi
                 comboBoxFromAccount.DataSource = allowedAccountIds;
             }
             else
             {
                 allowedAccountIds = null;
-
-                var allAccounts = accountService.GetAccountsByUserId(new Account()); // Tüm hesapları getiren metod varsa
-
+                var allAccounts = accountService.GetAccountsByUserId(new Account()); // Tüm hesapları getiren metod
                 var allAccountIds = allAccounts.Select(a => a.AccountID).ToList();
-
                 comboBoxFromAccount.DataSource = allAccountIds;
             }
-
         }
 
         private void btn_InsertTransaction_Click(object sender, EventArgs e)
         {
-            var accountService = new AccountService(new AccountRepository());
-
+            // Sınıf field'ı olan accountService'i kullanıyoruz, tekrar oluşturma
             if (!int.TryParse(comboBoxFromAccount.SelectedValue?.ToString(), out int fromAccountId))
             {
                 MessageBox.Show("Please select a valid From Account.");
@@ -76,7 +65,6 @@ namespace BankamatikFormApp
                 return;
             }
 
-            // fromAccount'u veritabanından al
             var fromAccount = accountService.GetAccountsByUserId(new Account())
                                 .FirstOrDefault(a => a.AccountID == fromAccountId);
             if (fromAccount == null)
@@ -85,7 +73,6 @@ namespace BankamatikFormApp
                 return;
             }
 
-            // toAccount'u veritabanından al
             var toAccount = accountService.GetAccountsByUserId(new Account())
                                 .FirstOrDefault(a => a.AccountID == toAccountId);
             if (toAccount == null)
@@ -94,21 +81,18 @@ namespace BankamatikFormApp
                 return;
             }
 
-            // Para cinsi kontrolü
             if (fromAccount.ParaCinsi != toAccount.ParaCinsi)
             {
                 MessageBox.Show("From Account and To Account must have the same currency.");
                 return;
             }
 
-            // Yeterli bakiye kontrolü
             if (fromAccount.Balance < amount)
             {
                 MessageBox.Show("Insufficient balance in the From Account.");
                 return;
             }
 
-            // İşlem oluşturma
             var newTransaction = new Transaction
             {
                 FromAccountID = fromAccountId,
@@ -127,8 +111,6 @@ namespace BankamatikFormApp
 
                 transactionService.CreateTransaction(newTransaction);
 
-                logService.InsertLog(CurrentUser?.ID, "Create", $"Transaction inserted: From={fromAccountId}, To={toAccountId}, Amount={amount}");
-
                 MessageBox.Show("Transaction inserted successfully.");
                 this.Close();
             }
@@ -137,10 +119,5 @@ namespace BankamatikFormApp
                 MessageBox.Show($"Error inserting transaction: {ex.Message}");
             }
         }
-
-
-
-
-
     }
 }

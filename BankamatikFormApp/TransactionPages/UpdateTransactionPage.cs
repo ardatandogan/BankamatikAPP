@@ -9,22 +9,35 @@ namespace BankamatikFormApp
     public partial class UpdateTransactionPage : Form
     {
         public Transaction CurrentTransaction { get; set; }
-        public int? CurrentUserID { get; set; }  // Kullanıcı ID'si için property
+        public int? CurrentUserID { get; set; }
 
-        private readonly TransactionService transactionService = new TransactionService(
-            new TransactionRepository(), new AccountRepository());
-
-        private readonly LogService logService = new LogService(new LogRepository());
+        private readonly TransactionService transactionService;
+        private readonly LogService logService;
 
         public UpdateTransactionPage()
         {
             InitializeComponent();
+
+            // Servisler constructor içinde oluşturuluyor (logService önce!)
+            logService = new LogService(new LogRepository());
+            transactionService = new TransactionService(
+                new TransactionRepository(),
+                new AccountRepository(),
+                logService);
         }
 
         private void UpdateTransactionPage_Load(object sender, EventArgs e)
         {
+            if (CurrentTransaction == null)
+            {
+                MessageBox.Show("Transaction data not found.");
+                Close();
+                return;
+            }
+
             txtTransactionID.Text = CurrentTransaction.TransactionID.ToString();
             txtAmount.Text = CurrentTransaction.Amount.ToString("0.00");
+            dateTimePicker1.Value = CurrentTransaction.TransactionDate;
         }
 
         private void btn_UpdateTransaction_Click(object sender, EventArgs e)
@@ -42,9 +55,6 @@ namespace BankamatikFormApp
 
                 transactionService.UpdateTransaction(CurrentTransaction);
 
-                // Log kaydı
-                logService.InsertLog(CurrentUserID, "UpdateTransaction", $"Transaction ID {CurrentTransaction.TransactionID} updated. New amount: {amount}");
-
                 MessageBox.Show("Transaction updated successfully.");
             }
             catch (Exception ex)
@@ -55,7 +65,7 @@ namespace BankamatikFormApp
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            // Şimdilik boş, gerekirse ekleme yapabilirsin
+            // Gerekirse tarih değişimiyle ilgili işlem eklenebilir
         }
     }
 }

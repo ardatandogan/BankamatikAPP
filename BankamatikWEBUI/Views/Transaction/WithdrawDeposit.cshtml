@@ -1,0 +1,40 @@
+﻿@model BankamatikWebApp.Models.WithdrawDepositViewModel
+
+@{
+    ViewData["Title"] = "Para Yatır / Çek";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")" role="alert">
+        @Model.Message
+    </div>
+}
+
+<form asp-controller="Transaction" asp-action="ProcessWithdrawDeposit" method="post">
+    <div class="form-group">
+        <label asp-for="SelectedAccountId"></label>
+        <select asp-for="SelectedAccountId" asp-items="Model.Accounts" class="form-control">
+            <option value="">Hesap Seçin</option>
+        </select>
+        <span asp-validation-for="SelectedAccountId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Amount"></label>
+        <input asp-for="Amount" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
+    </div>
+
+    <hr />
+
+    <button type="submit" name="actionType" value="Withdraw" class="btn btn-warning">Para Çek</button>
+    <button type="submit" name="actionType" value="Deposit" class="btn btn-success">Para Yatır</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

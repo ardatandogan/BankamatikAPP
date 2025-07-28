@@ -1,0 +1,45 @@
+﻿@model List<Bankamatik.Core.Entities.Transaction>
+@{
+    ViewData["Title"] = "İşlem Geçmişi";
+}
+
+<h2>İşlem Geçmişi</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Yeni İşlem Oluştur</a>
+    @* Yeni buton eklendi ve TransactionController'a yönlendiriyor *@
+    <a asp-controller="Transaction" asp-action="WithdrawDeposit" class="btn btn-info ms-2">Para Yatır / Çek</a>
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info" role="alert">
+        Henüz görüntülenecek bir işlem bulunmamaktadır.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>İşlem ID</th>
+                <th>Gönderen Hesap</th>
+                <th>Alıcı Hesap</th>
+                <th>Miktar</th>
+                <th>Tarih</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TransactionID</td>
+                    <td>@item.FromAccountID</td>
+                    <td>@item.ToAccountID</td>
+                    <td>@item.Amount.ToString("N2")</td>
+                    <td>@item.TransactionDate.ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

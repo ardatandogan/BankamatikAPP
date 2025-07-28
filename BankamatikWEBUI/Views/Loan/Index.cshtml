@@ -1,0 +1,52 @@
+﻿@model List<Bankamatik.Core.Entities.Loan>
+
+@{
+    ViewData["Title"] = "Loans";
+}
+
+<h2>Loans</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Loan ID</th>
+            <th>Miktar</th>
+            <th>Faiz Oranı</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Durum</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var loan in Model)
+            {
+                <tr>
+                    <td>@loan.LoanID</td>
+                    <td>@loan.Amount.ToString("C")</td>
+                    <td>@(loan.InterestRate * 100)%</td>
+                    <td>@loan.StartDate.ToShortDateString()</td>
+                    <td>@loan.EndDate.ToShortDateString()</td>
+                    <td>@loan.Status</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No loans found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a class="btn btn-primary" asp-action="ApplyLoan">Apply Loan</a>
+    <a class="btn btn-secondary" asp-action="PayLoan">Pay Loan</a>
+</div>
