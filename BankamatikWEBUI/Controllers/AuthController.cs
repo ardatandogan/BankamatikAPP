@@ -45,18 +45,16 @@ namespace Bankamatik.WebUI.Controllers
         {
             var user = _userService.GetUserByUsername(new User { Username = username });
 
-            if (user != null && user.PasswordHash == password)  // Not: Gerçek projede hash karşılaştırmalı
+            if (user != null && user.PasswordHash == password) 
             {
                 HttpContext.Session.SetInt32("userId", user.ID);
                 HttpContext.Session.SetString("username", user.Username);
                 HttpContext.Session.SetString("role", user.Role);
 
-                // Log: Kullanıcı başarılı giriş yaptı
 
                 return RedirectToAction("Index", "User");
             }
 
-            // Log: Başarısız giriş denemesi (userId null, username ile loglayabiliriz)
 
             ViewBag.Error = "Kullanıcı adı veya şifre yanlış";
             return View();
@@ -69,7 +67,6 @@ namespace Bankamatik.WebUI.Controllers
 
             HttpContext.Session.Clear();
 
-            // Log: Kullanıcı çıkış yaptı
 
             return RedirectToAction("Login");
         }

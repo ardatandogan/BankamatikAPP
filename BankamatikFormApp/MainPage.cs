@@ -11,9 +11,6 @@ using System.Windows.Forms;
 namespace BankamatikFormApp
 {
 
- 
-
-
     public partial class MainPage : Form
     {
         public User CurrentUser { get; set; }
@@ -374,6 +371,37 @@ namespace BankamatikFormApp
             form.ShowDialog();
 
             LoadLoans();
+        }
+
+        private void btn_Deposit_Click(object sender, EventArgs e)
+        {
+            if (CurrentUser.Role == "Admin")
+            {
+                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
+            }
+            else
+            {
+                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
+            }
+        }
+
+        private void btn_Withdraw_Click(object sender, EventArgs e)
+        {
+            if (CurrentUser.Role == "Admin")
+            {
+                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
+            }
+            else
+            {
+                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
+            }
+        }
+
+        private void btn_PayLoan_Click(object sender, EventArgs e)
+        {
+            PayLoanPage payLoanPage = new PayLoanPage();
+            payLoanPage.CurrentUser = this.CurrentUser; // Giriş yapan kullanıcıyı aktar
+            payLoanPage.ShowDialog(); // Pop-up gibi açmak için ShowDialog kullan
         }
 
         #endregion
@@ -897,35 +925,6 @@ namespace BankamatikFormApp
             }
         }
 
-        private void btn_Deposit_Click(object sender, EventArgs e)
-        {
-            if (CurrentUser.Role == "Admin")
-            {
-                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
-            }
-            else
-            {
-                HandleTransaction(true, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
-            }
-        }
-
-        private void btn_Withdraw_Click(object sender, EventArgs e)
-        {
-            if (CurrentUser.Role == "Admin")
-            {
-                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = Convert.ToInt32(comboBoxAccountID.SelectedValue) }).Select(a => a.AccountID).ToList());
-            }
-            else
-            {
-                HandleTransaction(false, accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID }).Select(a => a.AccountID).ToList());
-            }
-        }
-
-        private void btn_PayLoan_Click(object sender, EventArgs e)
-        {
-            PayLoanPage payLoanPage = new PayLoanPage();
-            payLoanPage.CurrentUser = this.CurrentUser; // Giriş yapan kullanıcıyı aktar
-            payLoanPage.ShowDialog(); // Pop-up gibi açmak için ShowDialog kullan
-        }
+       
     }
 }

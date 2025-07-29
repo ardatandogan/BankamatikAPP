@@ -61,7 +61,7 @@ namespace BankamatikWEBUI.Controllers
                 users = currentUser != null ? new List<User> { currentUser } : new List<User>();
             }
 
-            ViewBag.UserRole = role; // view için rolü gönder
+            ViewBag.UserRole = role; 
 
             return View(users);
         }
@@ -141,7 +141,7 @@ namespace BankamatikWEBUI.Controllers
             var user = _userService.GetUserById(new User { ID = id });
             if (user == null) return NotFound();
 
-            return View(user);  // Confirm sayfası açılıyor
+            return View(user);  
         }
 
         [HttpPost, ActionName("Delete")]

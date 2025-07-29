@@ -17,7 +17,7 @@ namespace BankamatikWEBUI.Controllers
         // Tüm logları listele
         public IActionResult Index()
         {
-            List<Log> logs = _logService.GetLogsByFilters(new Log()); // filtre boş, tüm loglar gelir
+            List<Log> logs = _logService.GetLogsByFilters(new Log()); 
             return View(logs);
         }
     }

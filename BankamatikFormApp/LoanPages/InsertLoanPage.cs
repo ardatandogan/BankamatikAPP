@@ -12,13 +12,11 @@ namespace BankamatikFormApp
     {
         public User CurrentUser { get; set; }
 
-        // Burada AccountRepository ve LogRepository nesnelerini oluşturup geçiyoruz
         private readonly AccountService accountService = new AccountService(
             new AccountRepository(),
             new LogService(new LogRepository())
         );
 
-        // LoanService de LoanRepository, AccountRepository ve LogService alıyor
         private readonly LoanService loanService = new LoanService(
             new LoanRepository(),
             new AccountRepository(),
@@ -35,7 +33,7 @@ namespace BankamatikFormApp
             LoadAccounts();
             LoadInterestRateOffers();
 
-            cmbAccounts.DisplayMember = "AccountDisplay";  // Eğer Account entity'sinde böyle bir property yoksa, burada değiştirmelisin
+            cmbAccounts.DisplayMember = "AccountDisplay";  
             cmbAccounts.ValueMember = "AccountID";
 
             dtpStartDate.Value = DateTime.Today;
@@ -53,7 +51,7 @@ namespace BankamatikFormApp
                 cmbAccounts.DataSource = accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
             }
 
-            cmbAccounts.DisplayMember = "AccountDisplay"; // Bu property varsa sorun yok, yoksa ToString override vs. yapmalısın
+            cmbAccounts.DisplayMember = "AccountDisplay"; 
             cmbAccounts.ValueMember = "AccountID";
         }
 

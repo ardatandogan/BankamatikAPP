@@ -92,10 +92,7 @@ namespace BankamatikFormApp
 
             try
             {
-                accountService.CreateAccount(newAccount);
-
-                // Log kaydı kaydedilip log tablosuna aktarılacak.
-              
+                accountService.CreateAccount(newAccount);              
 
                 MessageBox.Show("Account inserted successfully.");
                 this.Close();

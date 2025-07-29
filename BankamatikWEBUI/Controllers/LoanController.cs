@@ -167,7 +167,6 @@ namespace BankamatikWEBUI.Controllers
             if (!userId.HasValue)
                 return RedirectToAction("Login", "Auth");
 
-            // Ödeme mantığı burada olacak, örn: bakiye kontrolü, kredi güncelleme vb.
 
             TempData["Success"] = "Loan payment processed.";
 

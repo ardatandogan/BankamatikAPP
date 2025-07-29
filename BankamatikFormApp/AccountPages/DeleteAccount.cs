@@ -36,8 +36,6 @@ namespace BankamatikFormApp
                     if (success)
                     {
                         MessageBox.Show("Account and related transactions deleted successfully.");
-
-                        // Log ekle
                        
                     }
                     else

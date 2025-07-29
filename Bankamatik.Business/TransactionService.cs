@@ -29,17 +29,14 @@ namespace Bankamatik.Business.Services
         {
             var transactions = new List<Transaction>();
 
-            // Kullanıcının tüm hesaplarını al
             var accounts = _accountRepository.GetAccounts(new Account { UserID = userId });
 
-            // Her hesap için transactionları çek
             foreach (var acc in accounts)
             {
                 var trans = _transactionRepository.GetTransactions(new Transaction { AccountID = acc.AccountID });
                 transactions.AddRange(trans);
             }
 
-            // 🔴 Aynı işlem (ID olarak) birden fazla eklenmiş olabilir: filtrele
             return transactions
                 .GroupBy(t => t.TransactionID)
                 .Select(g => g.First())

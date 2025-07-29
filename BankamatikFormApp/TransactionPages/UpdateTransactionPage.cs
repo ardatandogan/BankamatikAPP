@@ -18,7 +18,6 @@ namespace BankamatikFormApp
         {
             InitializeComponent();
 
-            // Servisler constructor içinde oluşturuluyor (logService önce!)
             logService = new LogService(new LogRepository());
             transactionService = new TransactionService(
                 new TransactionRepository(),
@@ -65,7 +64,6 @@ namespace BankamatikFormApp
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            // Gerekirse tarih değişimiyle ilgili işlem eklenebilir
         }
     }
 }

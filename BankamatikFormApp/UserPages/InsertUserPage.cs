@@ -43,18 +43,15 @@ namespace BankamatikFormApp
             {
                 Username = username,
                 PasswordHash = password,
-                Role = "User" // varsayılan rol
+                Role = "User" 
             };
 
             try
             {
                 string resultMessage = userService.CreateUser(newUser);
                 MessageBox.Show(resultMessage, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // İsteğe bağlı: oluşturulan kullanıcıyı geri al
                 var createdUser = userService.GetUserByUsername(new User { Username = newUser.Username });
 
-                // Log kaydı da burada eklenebilir (dilersen ekleyebilirim)
             }
             catch (Exception ex)
             {

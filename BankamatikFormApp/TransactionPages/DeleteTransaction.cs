@@ -15,7 +15,6 @@ namespace BankamatikFormApp
             new AccountRepository(),
             new LogService(new LogRepository())
         );
-        // Giriş yapan kullanıcıyı buraya set etmen gerekebilir
         public User? CurrentUser { get; set; }
 
         public DeleteTransaction()

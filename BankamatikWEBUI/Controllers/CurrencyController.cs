@@ -3,8 +3,6 @@ using Bankamatik.Core.Entities;
 using BankamatikWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Http; // HttpContext.Session için
-using System.Linq; // FirstOrDefault için
 using System;
 
 namespace BankamatikWebApp.Controllers

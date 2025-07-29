@@ -91,7 +91,6 @@ namespace Bankamatik.Business.Services
 
         public bool DeleteAccount(int accountId)
         {
-            // Öncelikle silinecek hesabın UserID'sini alalım ki log için kullanabilelim.
             var accountToDelete = GetAccountByAccountId(new Account { AccountID = accountId });
 
             _accountRepository.DeleteTransactionsByAccountId(accountId);

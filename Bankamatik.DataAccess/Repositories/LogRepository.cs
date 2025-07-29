@@ -15,10 +15,6 @@ namespace Bankamatik.DataAccess.Repositories
             _connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BankamatikDB;Trusted_Connection=True;";
         }
 
-        // Tüm logları getirir
-       
-
-        // Tüm filtreleri destekleyen ortak metot (iç kullanım)
         public List<Log> GetLogsByFilters(Log log)
      {
             var logs = new List<Log>();
@@ -53,7 +49,6 @@ namespace Bankamatik.DataAccess.Repositories
             return logs;
         }
 
-        // Yeni log kaydı ekler
         public void InsertLog(Log log)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))

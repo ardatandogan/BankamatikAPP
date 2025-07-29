@@ -14,7 +14,7 @@ namespace Bankamatik.Core.Entities
         public decimal InterestRate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string Status { get; set; }  // Active, Paid, vb.
+        public string Status { get; set; }  
         public DateTime CreatedAt { get; set; }
 
     }

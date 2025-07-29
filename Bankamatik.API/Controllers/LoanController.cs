@@ -10,11 +10,7 @@ namespace Bankamatik.WebUI.Controllers
 
         public LoanController()
         {
-            _loanService = new LoanService(
-                new DataAccess.Repositories.LoanRepository(),
-                new LogService(new DataAccess.Repositories.LogRepository()),
-                new DataAccess.Repositories.AccountRepository()
-            );
+          
         }
 
         // Yeni kredi başvurusu formu (GET)

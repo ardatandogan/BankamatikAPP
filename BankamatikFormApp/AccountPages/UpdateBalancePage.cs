@@ -9,7 +9,7 @@ namespace BankamatikFormApp
     public partial class UpdateBalancePage : Form
     {
         public Account CurrentAccount { get; set; }
-        public int? CurrentUserID { get; set; }  // Kullanıcı ID'si için property eklendi
+        public int? CurrentUserID { get; set; }  
 
         private readonly AccountService accountService;
         private readonly LogService logService = new LogService(new LogRepository());
@@ -40,7 +40,6 @@ namespace BankamatikFormApp
                     CurrentAccount.Balance = newBalance;
                     accountService.UpdateAccount(CurrentAccount);
 
-                    // Log kaydı eklendi
 
                     MessageBox.Show("Balance updated successfully.");
                 }

@@ -19,7 +19,6 @@ namespace BankamatikFormApp.LoanPages
         {
             InitializeComponent();
 
-            // Doğru şekilde servisleri başlat
             loanService = new LoanService(
                 new LoanRepository(),
                 new AccountRepository(),
@@ -91,7 +90,7 @@ namespace BankamatikFormApp.LoanPages
                 : accountService.GetAccountsByUserId(new Account { UserID = CurrentUser.ID });
 
             comboBoxAccounts.DataSource = accounts;
-            comboBoxAccounts.DisplayMember = "Display"; // Display adında property varsa
+            comboBoxAccounts.DisplayMember = "Display"; 
             comboBoxAccounts.ValueMember = "AccountID";
         }
     }

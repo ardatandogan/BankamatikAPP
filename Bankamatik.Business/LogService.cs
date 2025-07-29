@@ -14,15 +14,11 @@ namespace Bankamatik.Business.Services
             _logRepository = logRepository ?? throw new ArgumentNullException(nameof(logRepository));
         }
 
-        // Tüm logları getirir
         public List<Log> GetLogsByFilters(Log log)
         {
             return _logRepository.GetLogsByFilters(log);
         }
 
-
-
-        // Yeni log kaydı ekler
         public void InsertLog(Log log)
         {
             _logRepository.InsertLog(log); // sadece log entity'si alıyor

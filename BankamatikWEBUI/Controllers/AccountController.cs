@@ -14,7 +14,6 @@ namespace BankamatikWEBUI.Controllers
             _accountService = new AccountService(new Bankamatik.DataAccess.Repositories.AccountRepository(), logService);
         }
 
-        // Hesapları listele (admin ise tüm hesaplar, user ise kendi hesapları)
         public IActionResult Index(string? search)
         {
             var userId = HttpContext.Session.GetInt32("userId");
@@ -22,7 +21,6 @@ namespace BankamatikWEBUI.Controllers
 
             if (role.ToLower() != "admin" && userId == null)
             {
-                // Giriş yapılmamış kullanıcıyı login sayfasına yönlendir
                 return RedirectToAction("Login", "Auth");
             }
 
@@ -30,19 +28,17 @@ namespace BankamatikWEBUI.Controllers
 
             if (role.ToLower() == "admin")
             {
-                // Admin tüm hesapları görebilir
                 if (!string.IsNullOrEmpty(search))
                 {
                     filter.UserID = int.Parse(search);
                 }
                 else
                 {
-                    filter.UserID = null; // tüm hesaplar
+                    filter.UserID = null; 
                 }
             }
             else
             {
-                // User sadece kendi hesaplarını görebilir
                 filter.UserID = userId.Value;
                 if (!string.IsNullOrEmpty(search))
                 {

@@ -67,7 +67,6 @@ namespace LogMailerApp
             }
         }
 
-        //log listesini html e dönüştürüyor
         static string BuildHtmlBody(List<Log> logListesi)
         {
             var sb = new StringBuilder();

@@ -27,8 +27,8 @@ namespace BankamatikFormApp
             try
             {
                 var userService = new UserService(
-     new UserRepository(),
-     new LogService(new LogRepository())
+                 new UserRepository(),
+                new LogService(new LogRepository())
  );
                 User? user = userService.GetUserByUsername(new User { Username = username });
 
@@ -38,12 +38,12 @@ namespace BankamatikFormApp
                     return;
                 }
 
-                var logService = new LogService(new Bankamatik.DataAccess.Repositories.LogRepository());
+                var logService = new LogService(new LogRepository());
                 MessageBox.Show("Login successful.", "Welcome", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 MainPage mainPage = new MainPage
                 {
-                    CurrentUser = user  // Kullanýcýyý CurrentUser olarak atýyoruz
+                    CurrentUser = user  
                 };
 
                 this.Hide(); // Login formu gizle

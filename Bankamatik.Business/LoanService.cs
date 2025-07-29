@@ -12,7 +12,6 @@ namespace Bankamatik.Business.Services
         private readonly AccountRepository _accountRepository;
         private readonly LogService _logService;
 
-        // Constructor: LoanRepository, AccountRepository ve LogService'i zorunlu alıyor
         public LoanService(LoanRepository loanRepository, AccountRepository accountRepository, LogService logService)
         {
             _loanRepository = loanRepository;

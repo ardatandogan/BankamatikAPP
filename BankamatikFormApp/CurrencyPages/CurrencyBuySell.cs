@@ -165,7 +165,6 @@ namespace BankamatikFormApp
 
             decimal totalReturn = amount * currency.Satis;
 
-            // Bankanın ilgili TRY ve döviz hesabı bulunur
             var bankCurrencyAccount = accountService.GetAccountsByUserId(new Account())
                 .FirstOrDefault(a => a.UserID == BANK_USER_ID && a.ParaCinsi == currency.Kod);
             var bankTryAccount = accountService.GetAccountsByUserId(new Account())
@@ -183,7 +182,6 @@ namespace BankamatikFormApp
             accountService.UpdateAccount(fromAccount);
             accountService.UpdateAccount(toAccount);
 
-            // Banka hesapları güncelle
             bankCurrencyAccount.Balance += amount;
             bankTryAccount.Balance -= totalReturn;
             accountService.UpdateAccount(bankCurrencyAccount);
